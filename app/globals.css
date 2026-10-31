@@ -1,26 +1,105 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Design tokens — apocalyptic / forensic.
+ * All text colors are checked for >= 4.5:1 contrast against --color-void.
+ */
+@theme {
+  --color-void: #09090b;
+  --color-ash: #111114;
+  --color-ash-2: #18181c;
+  --color-line: #2a2a31;
+  --color-line-strong: #3a3a44;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bone: #eeece6;
+  --color-fog: #a1a1aa;
+  --color-dim: #8b8b94;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-alarm: #ff453a;
+  --color-alarm-deep: #b3170e;
+  --color-amber: #ffb020;
+
+  --color-risk-low: #34d27b;
+  --color-risk-mid: #ffd60a;
+  --color-risk-high: #ff453a;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --animate-blink: blink 1.1s steps(1, end) infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: var(--color-alarm);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+/* Faint red glow from above + film grain; purely decorative. */
+@utility doom-backdrop {
+  background-image:
+    radial-gradient(120% 60% at 50% -10%, rgb(255 69 58 / 0.16), transparent 60%),
+    radial-gradient(80% 40% at 100% 0%, rgb(255 176 32 / 0.06), transparent 60%);
+}
+
+@utility hazard-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-amber) 0 10px,
+    var(--color-void) 10px 20px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
