@@ -35,6 +35,7 @@ export const en = {
     submitting: "Reading dependencies…",
     shortcut: "Ctrl + Enter",
     examplesLabel: "Or try a repo:",
+    errorLabel: "Error:",
   },
 
   privacy: {

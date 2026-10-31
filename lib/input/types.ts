@@ -54,7 +54,11 @@ export type InputErrorCode =
   | "github-rate-limited"
   | "github-timeout"
   | "github-unavailable"
-  | "bad-request";
+  | "bad-request"
+  // Browser-only
+  | "file-type"
+  | "file-unreadable"
+  | "network";
 
 export interface ParseSuccess {
   ok: true;
@@ -75,9 +79,9 @@ export interface ParseFailure {
 
 export type ParseResult = ParseSuccess | ParseFailure;
 
-/** Body of POST /api/resolve. */
+/** Body of POST /api/resolve, also returned by the browser-side resolver. */
 export type ResolveResponse =
-  | (ParseSuccess & { ref: GitHubRef })
+  | (ParseSuccess & { ref?: GitHubRef })
   | (ParseFailure & { ref?: GitHubRef; location?: string });
 
 export interface GitHubRef {
