@@ -75,6 +75,11 @@ export interface ParseFailure {
 
 export type ParseResult = ParseSuccess | ParseFailure;
 
+/** Body of POST /api/resolve. */
+export type ResolveResponse =
+  | (ParseSuccess & { ref: GitHubRef })
+  | (ParseFailure & { ref?: GitHubRef; location?: string });
+
 export interface GitHubRef {
   owner: string;
   repo: string;
