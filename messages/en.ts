@@ -348,6 +348,28 @@ export const en = {
     genericAccent: "midnight?",
     genericBody: "Free doomsday forecast for your npm dependencies.",
     pending: "Forecast for {label} — open the link to see the score.",
+    /** Used when a pasted package.json has no name. */
+    thisProject: "This project",
+    /** Third person, for images seen by people who don't own the project. */
+    headline: {
+      critical: "{project}: its most critical dependency (**{name}**, {downloads} downloads/month) has **a single npm maintainer**.",
+      deprecated: "{project}: one of its dependencies, **{name}**, is **deprecated**.",
+      archived: "{project}: one of its dependencies, **{name}**, lives in an **archived** repo.",
+      unpublished: "{project}: one of its dependencies, **{name}**, was **unpublished** from npm.",
+      "stale-release": "{project}: one of its dependencies, **{name}**, hasn't had a release in **{age}**.",
+      "stale-push": "{project}: nobody has pushed to the repo of **{name}**, one of its dependencies, in **{age}**.",
+      "single-maintainer": "{project}: one of its dependencies, **{name}** ({downloads} downloads/month), has **a single npm maintainer**.",
+      "no-repo": "{project}: one of its dependencies, **{name}**, has no public source repository.",
+      watch: {
+        one: "{project}: nothing is on fire, but **{count} dependency** needs watching.",
+        other: "{project}: nothing is on fire, but **{count} dependencies** need watching.",
+      },
+      allClear: {
+        one: "{project}: **doomsday postponed.** Its only dependency is low risk.",
+        other: "{project}: **doomsday postponed.** All {count} of its dependencies are low risk.",
+      },
+      insufficient: "{project}: we couldn't get data for **{unscored} of {total}** packages, so there's no score yet.",
+    },
   },
 
   /** The "why" behind a package's risk. {age} is a duration like "4 years". */

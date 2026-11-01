@@ -18,9 +18,15 @@ describe("emphasisWords", () => {
     ]);
   });
 
+  it("keeps project paths up to 34 characters whole", () => {
+    expect(emphasisWords("vercel/next.js/packages/next: its")[0]).toEqual([
+      { text: "vercel/next.js/packages/next:", strong: false },
+    ]);
+  });
+
   it("shortens package names too long to wrap", () => {
     const [[piece]] = emphasisWords(`**@acme/${"x".repeat(60)}**`);
-    expect(piece.text.length).toBeLessThanOrEqual(28);
+    expect(piece.text.length).toBeLessThanOrEqual(34);
     expect(piece.text).toContain("…");
   });
 });

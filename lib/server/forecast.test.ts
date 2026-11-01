@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { depsKey, summaryFor, TIMED_OUT, withDeadline } from "./forecast";
+import { depsKey, imageHeadline, summaryFor, TIMED_OUT, withDeadline } from "./forecast";
 
 const calls: string[] = [];
 
@@ -75,13 +75,25 @@ describe("summaryFor", () => {
         minutesToMidnight: 1,
         total: 1,
         critical: 1,
-        headline: expect.stringContaining("**left-pad**"),
+        finding: { kind: "critical", name: "left-pad", downloads: 2_000_000 },
       }),
     });
 
     calls.length = 0;
     expect(await summaryFor(source)).toEqual(first);
     expect(calls).toEqual([]);
+  });
+
+  it("words image headlines in the third person, with the project's name", async () => {
+    const repo = await summaryFor({ kind: "repo", ref: { owner: "acme", repo: "shop" }, includeDev: false });
+    const list = await summaryFor({ kind: "list", list: { dependencies: ["left-pad"], devDependencies: [] } });
+    if (!repo.ok || !list.ok) throw new Error("expected summaries");
+    expect(imageHeadline(repo.summary)).toBe(
+      "acme/shop: its most critical dependency (**left-pad**, 2M downloads/month) has **a single npm maintainer**.",
+    );
+    expect(imageHeadline(list.summary)).toBe(
+      "This project: its most critical dependency (**left-pad**, 2M downloads/month) has **a single npm maintainer**.",
+    );
   });
 
   it("decodes list sources without touching GitHub", async () => {

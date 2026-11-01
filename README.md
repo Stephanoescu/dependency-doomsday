@@ -75,7 +75,7 @@ a free plan.
      the variables differently (for example `KV_REST_API_URL` and `KV_REST_API_TOKEN`), add the two
      variables above with the same values.
 4. **Verify.** Run a forecast on the live site, then open **Data Browser** in Upstash. You should see
-   keys like `dd:v3:npm:express`, `dd:v3:sum:…` and `dd:rl:analyze:…`.
+   keys like `dd:v4:npm:express`, `dd:v4:sum:…` and `dd:rl:analyze:…`.
 
 To use Upstash locally as well, put the same two variables in `.env.local`.
 

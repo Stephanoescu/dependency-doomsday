@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import type { ReactNode } from "react";
 import { fmt, getMessages, plural } from "@/lib/i18n";
 import type { RiskLevel } from "@/lib/risk";
-import type { ForecastSummary } from "./forecast";
+import { imageHeadline, type ForecastSummary } from "./forecast";
 
 export type ImageFormat = "wide" | "story";
 
@@ -52,8 +52,8 @@ function loadFonts(): Promise<Fonts> {
 }
 
 /** Package names can't wrap; very long ones are shortened so they never overflow the card. */
-function shortenLongWords(text: string, max = 28): string {
-  return text.replace(/\S{29,}/g, (word) => `${word.slice(0, max - 10)}…${word.slice(-8)}`);
+function shortenLongWords(text: string, max = 34): string {
+  return text.replace(/\S+/g, (word) => (word.length > max ? `${word.slice(0, max - 11)}…${word.slice(-10)}` : word));
 }
 
 /**
@@ -228,7 +228,7 @@ function WideCard({ summary, url }: { summary: ForecastSummary; url: string }) {
         <Clock minutes={summary.state === "insufficient" ? null : summary.minutesToMidnight} level={summary.level} size={330} />
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 18 }}>
           {scoreBlock(summary, 0.9)}
-          <Headline text={summary.headline} color={accent} fontSize={32} />
+          <Headline text={imageHeadline(summary)} color={accent} fontSize={32} />
         </div>
       </div>
       <Footer url={url} size={20} />
@@ -258,7 +258,7 @@ function StoryCard({ summary, url }: { summary: ForecastSummary; url: string }) 
         </div>
       )}
       <div style={{ display: "flex", marginTop: 56 }}>
-        <Headline text={summary.headline} color={accent} fontSize={60} center />
+        <Headline text={imageHeadline(summary)} color={accent} fontSize={60} center />
       </div>
       <div style={{ display: "flex", flex: 1, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 28 }}>
         <Clock minutes={summary.state === "insufficient" ? null : summary.minutesToMidnight} level={summary.level} size={500} />

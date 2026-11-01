@@ -4,7 +4,7 @@ import { getMessages } from "@/lib/i18n";
 import { formatGitHubRef } from "@/lib/input/github-url";
 import { parsePackageJson } from "@/lib/input/package-json";
 import type { Dependency, InputErrorCode } from "@/lib/input/types";
-import { findHeadline, resultState, writeFinding, type ResultState } from "@/lib/narrative";
+import { findHeadline, resultState, writeFinding, type Finding, type ResultState } from "@/lib/narrative";
 import type { RiskLevel } from "@/lib/risk";
 import { listDependencies, sourceLabel, type ShareSource } from "@/lib/share/links";
 import { analyzePackages } from "./analyze";
@@ -18,8 +18,8 @@ export interface ForecastSummary {
   score: number | null;
   minutesToMidnight: number | null;
   level: RiskLevel | null;
-  /** Result-page headline, with **emphasis** markers. */
-  headline: string;
+  /** The worst finding; worded at render time, with the project's name. */
+  finding: Finding;
   total: number;
   scored: number;
   critical: number;
@@ -42,7 +42,7 @@ export function summarizeResult(result: AnalysisResult, label?: string): Forecas
     score: forecast.score,
     minutesToMidnight: forecast.minutesToMidnight,
     level: forecast.level,
-    headline: writeFinding(findHeadline(packages, forecast), getMessages().result.headline),
+    finding: findHeadline(packages, forecast),
     total: packages.length,
     scored: forecast.scored,
     critical: forecast.critical,
@@ -51,6 +51,12 @@ export function summarizeResult(result: AnalysisResult, label?: string): Forecas
 }
 
 /** Called after every analysis so share images for it can be drawn instantly. */
+/** Third-person headline for share images: "expressjs/express: its most critical dependency…". */
+export function imageHeadline(summary: ForecastSummary): string {
+  const t = getMessages().og;
+  return writeFinding(summary.finding, t.headline, { project: summary.label || t.thisProject });
+}
+
 export async function saveSummary(deps: Dependency[], result: AnalysisResult, label?: string): Promise<void> {
   await getCache().setMany([
     { key: cacheKey.summary(depsKey(deps)), value: summarizeResult(result, label), ttl: TTL.summary },

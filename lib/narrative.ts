@@ -102,16 +102,22 @@ export function findHeadline(packages: ScoredPackage[], forecast: Forecast): Fin
   return { kind: "watch", count: forecast.levels.mid };
 }
 
-export function writeFinding(finding: Finding, messages: HeadlineMessages): string {
+/** `extra` fills message-set specific placeholders, e.g. {project} in share images. */
+export function writeFinding(
+  finding: Finding,
+  messages: HeadlineMessages,
+  extra: Record<string, string | number> = {},
+): string {
   switch (finding.kind) {
     case "insufficient":
-      return fmt(messages.insufficient, { unscored: finding.unscored, total: finding.total });
+      return fmt(messages.insufficient, { ...extra, unscored: finding.unscored, total: finding.total });
     case "all-clear":
-      return plural(messages.allClear, finding.count);
+      return plural(messages.allClear, finding.count, extra);
     case "watch":
-      return plural(messages.watch, finding.count);
+      return plural(messages.watch, finding.count, extra);
     default:
       return fmt(messages[finding.kind], {
+        ...extra,
         name: finding.name,
         downloads: formatCompact(finding.downloads),
         age: formatMonths(finding.months ?? 0),
