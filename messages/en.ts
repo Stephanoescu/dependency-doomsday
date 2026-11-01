@@ -69,6 +69,7 @@ export const en = {
     "file-unreadable": "We couldn't read that file. Try pasting its contents instead.",
     network: "Network error. Check your connection and try again.",
     "analysis-failed": "The analysis failed on our side. Try again in a moment.",
+    "rate-limited": "Too many forecasts in a minute. Try again in {seconds} s.",
   },
 
   monorepo: {
@@ -242,11 +243,111 @@ export const en = {
   share: {
     title: "Share your forecast",
     copyLink: "Copy link",
+    copied: "Copied",
     linkedin: "LinkedIn",
     x: "X",
+    native: "Share…",
     image: "Download image",
+    imageWide: "Landscape · 1200×630",
+    imageWideHint: "LinkedIn, X",
+    imageStory: "Story · 1080×1920",
+    imageStoryHint: "Instagram, TikTok",
+    imageWorking: "Rendering…",
+    imageFailed: "The image couldn't be generated. Try again in a moment.",
     badge: "Copy badge",
-    soon: "Sharing arrives in the next update.",
+    badgeCopied: "Badge Markdown copied",
+    badgeReposOnly: "Badges are for GitHub repos.",
+    linkedinCopied: "Post text copied — paste it into LinkedIn.",
+    listPrivacy: "This link contains your package names, nothing else.",
+    excluded: {
+      one: "{count} package wasn't found on npm (it may be private), so it's left out of the link.",
+      other: "{count} packages weren't found on npm (they may be private), so they're left out of the link.",
+    },
+    /** First-person versions of the headline, for posts. Plain text, no emphasis. */
+    headline: {
+      critical: "My most critical dependency ({name}, {downloads} downloads/month) has a single npm maintainer.",
+      deprecated: "One of my dependencies ({name}) is deprecated.",
+      archived: "One of my dependencies ({name}) lives in an archived repo.",
+      unpublished: "One of my dependencies ({name}) was unpublished from npm.",
+      "stale-release": "One of my dependencies ({name}) hasn't had a release in {age}.",
+      "stale-push": "Nobody has pushed to the repo of {name}, one of my dependencies, in {age}.",
+      "single-maintainer": "One of my dependencies ({name}, {downloads} downloads/month) has a single npm maintainer.",
+      "no-repo": "One of my dependencies ({name}) has no public source repository.",
+      watch: {
+        one: "Nothing is on fire, but {count} dependency needs watching.",
+        other: "Nothing is on fire, but {count} dependencies need watching.",
+      },
+      allClear: {
+        one: "Doomsday postponed: my only dependency is low risk.",
+        other: "Doomsday postponed: all {count} of my dependencies are low risk.",
+      },
+      insufficient: "",
+    },
+    /** Same, without the package name, when a post would be too long. */
+    headlineShort: {
+      critical: "My most critical dependency has a single npm maintainer.",
+      deprecated: "One of my dependencies is deprecated.",
+      archived: "One of my dependencies lives in an archived repo.",
+      unpublished: "One of my dependencies was unpublished from npm.",
+      "stale-release": "One of my dependencies hasn't had a release in {age}.",
+      "stale-push": "Nobody has pushed to one of my dependencies in {age}.",
+      "single-maintainer": "One of my dependencies has a single npm maintainer.",
+      "no-repo": "One of my dependencies has no public source repository.",
+      watch: {
+        one: "Nothing is on fire, but {count} dependency needs watching.",
+        other: "Nothing is on fire, but {count} dependencies need watching.",
+      },
+      allClear: {
+        one: "Doomsday postponed: my only dependency is low risk.",
+        other: "Doomsday postponed: all {count} of my dependencies are low risk.",
+      },
+      insufficient: "",
+    },
+    lead: {
+      one: "My project is {count} minute to midnight.",
+      other: "My project is {count} minutes to midnight.",
+    },
+    cta: "Check yours:",
+    generic: "How close is your project to midnight? Check your npm dependencies:",
+    linkedinPost:
+      "{lead} Doomsday score: {score}/100.\n\n{headline}\n\nDependency Doomsday checks every npm dependency for abandoned packages, single maintainers and critical single points of failure — with fixed public rules, not AI.\n\nCheck yours: {url}",
+    linkedinGeneric:
+      "How close is your project to midnight? Dependency Doomsday checks every npm dependency for abandoned packages, single maintainers and critical single points of failure — with fixed public rules, not AI.\n\nCheck yours: {url}",
+  },
+
+  /** Pages opened from a share link. */
+  shared: {
+    eyebrow: "Doomsday forecast",
+    untitled: "Shared project",
+    home: "Get your own forecast",
+    metaTitle: "{label} — Doomsday forecast",
+    metaTitleList: "A doomsday forecast",
+    metaDescription:
+      "How close is {label} to midnight? A forecast of its npm dependencies: abandoned packages, single maintainers and critical ones.",
+    metaDescriptionList:
+      "How close is this project to midnight? A forecast of its npm dependencies: abandoned packages, single maintainers and critical ones.",
+    invalid: "This forecast link is broken or incomplete. Paste the package.json or repo again for a fresh forecast.",
+  },
+
+  /** README badge (/api/badge). Short: it sits in a 20px-high badge. */
+  badge: {
+    pending: "analyzing…",
+    noData: "no data",
+    invalid: "invalid repo",
+    notFound: "repo not found",
+    noPackageJson: "no package.json",
+  },
+
+  /** Share images (/api/og). */
+  og: {
+    scoreLabel: "DOOMSDAY SCORE",
+    footer: "Rules, not AI",
+    cta: "How close is yours?",
+    stats: "{total} dependencies · {high} high risk · {critical} critical",
+    genericTitle: "How close is your project to",
+    genericAccent: "midnight?",
+    genericBody: "Free doomsday forecast for your npm dependencies.",
+    pending: "Forecast for {label} — open the link to see the score.",
   },
 
   /** The "why" behind a package's risk. {age} is a duration like "4 years". */

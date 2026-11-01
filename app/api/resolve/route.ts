@@ -8,6 +8,7 @@ import {
   type ResolveResponse,
 } from "@/lib/input/types";
 import { fetchExternalWorkspaces, fetchPackageJsonFromGitHub } from "@/lib/server/github";
+import { clientIp, rateLimit, rateLimitHeaders } from "@/lib/server/rate-limit";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
@@ -23,6 +24,7 @@ const STATUS: Partial<Record<InputErrorCode, number>> = {
   "repo-not-found": 404,
   "package-json-not-found": 404,
   "github-rate-limited": 429,
+  "rate-limited": 429,
   "github-timeout": 504,
   "github-unavailable": 502,
   "too-large": 413,
@@ -36,9 +38,9 @@ function mightBeMonorepoRoot(result: ParseResult): boolean {
   return runtime < MONOREPO_DEPENDENCY_THRESHOLD;
 }
 
-function reply(body: ResolveResponse) {
+function reply(body: ResolveResponse, headers: Record<string, string> = {}) {
   const status = body.ok ? 200 : (STATUS[body.error] ?? 422);
-  return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
+  return Response.json(body, { status, headers: { "Cache-Control": "no-store", ...headers } });
 }
 
 /**
@@ -46,6 +48,11 @@ function reply(body: ResolveResponse) {
  * package names — the file itself is never sent back or stored.
  */
 export async function POST(request: Request) {
+  const limited = await rateLimit("resolve", clientIp(request));
+  if (!limited.ok) {
+    return reply({ ok: false, error: "rate-limited", retryAfter: limited.retryAfter }, rateLimitHeaders(limited));
+  }
+
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
     return reply({ ok: false, error: "bad-request" });
   }

@@ -55,6 +55,8 @@ export type InputErrorCode =
   | "github-timeout"
   | "github-unavailable"
   | "bad-request"
+  // Our own per-IP limit
+  | "rate-limited"
   // Browser-only
   | "file-type"
   | "file-unreadable"
@@ -82,7 +84,7 @@ export type ParseResult = ParseSuccess | ParseFailure;
 /** Body of POST /api/resolve, also returned by the browser-side resolver. */
 export type ResolveResponse =
   | (ParseSuccess & { ref?: GitHubRef })
-  | (ParseFailure & { ref?: GitHubRef; location?: string });
+  | (ParseFailure & { ref?: GitHubRef; location?: string; retryAfter?: number });
 
 export interface GitHubRef {
   owner: string;

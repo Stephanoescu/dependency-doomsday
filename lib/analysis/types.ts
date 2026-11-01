@@ -85,7 +85,8 @@ export type AnalysisEvent =
   | { type: "start"; total: number }
   | { type: "progress"; done: number; total: number; name: string }
   | { type: "result"; result: AnalysisResult }
-  | { type: "error"; error: "bad-request" | "internal" };
+  | { type: "error"; error: "bad-request" | "internal" }
+  | { type: "error"; error: "rate-limited"; retryAfter: number };
 
 /** A package without npm data cannot be scored ("no data"). */
 export function hasData(pkg: PackageData): boolean {

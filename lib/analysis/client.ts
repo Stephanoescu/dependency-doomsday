@@ -3,7 +3,8 @@ import type { AnalysisEvent, AnalysisResult } from "./types";
 
 export type AnalysisOutcome =
   | { ok: true; result: AnalysisResult }
-  | { ok: false; error: "analysis-failed" | "network" };
+  | { ok: false; error: "analysis-failed" | "network" }
+  | { ok: false; error: "rate-limited"; retryAfter: number };
 
 /**
  * Browser side of POST /api/analyze. Sends package names only and reports
@@ -47,7 +48,11 @@ export async function runAnalysis(
         if (event.type === "start") onProgress?.(0, event.total);
         else if (event.type === "progress") onProgress?.(event.done, event.total, event.name);
         else if (event.type === "result") return { ok: true, result: event.result };
-        else if (event.type === "error") return { ok: false, error: "analysis-failed" };
+        else if (event.type === "error") {
+          return event.error === "rate-limited"
+            ? { ok: false, error: "rate-limited", retryAfter: event.retryAfter }
+            : { ok: false, error: "analysis-failed" };
+        }
       }
       if (done) break;
     }
