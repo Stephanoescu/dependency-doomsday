@@ -1,0 +1,217 @@
+{
+  "capturedAt": "2026-11-01T22:19:21.334Z",
+  "packages": [
+    {
+      "name": "request",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "request",
+        "latestVersion": "2.88.2",
+        "deprecated": "request has been deprecated, see https://github.com/request/request/issues/3142",
+        "unpublished": false,
+        "maintainers": [
+          "fredkschott",
+          "mikeal",
+          "nylen",
+          "simov"
+        ],
+        "lastPublishAt": "2020-02-11T16:35:36.122Z",
+        "createdAt": "2011-01-22T00:36:12.640Z",
+        "dependencyCount": 20,
+        "repositoryUrl": "https://github.com/request/request",
+        "github": {
+          "owner": "request",
+          "repo": "request"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 47551176,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "request/request",
+        "pushedAt": "2024-08-14T00:09:41Z",
+        "archived": false,
+        "openIssues": 145,
+        "stars": 25483,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "left-pad",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "left-pad",
+        "latestVersion": "1.3.0",
+        "deprecated": "use String.prototype.padStart()",
+        "unpublished": false,
+        "maintainers": [
+          "stevemao",
+          "westlac"
+        ],
+        "lastPublishAt": "2018-04-09T01:10:45.796Z",
+        "createdAt": "2014-03-14T09:09:20.762Z",
+        "dependencyCount": 0,
+        "repositoryUrl": "https://github.com/stevemao/left-pad",
+        "github": {
+          "owner": "stevemao",
+          "repo": "left-pad"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 12252317,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "left-pad/left-pad",
+        "pushedAt": "2019-04-19T14:16:20Z",
+        "archived": true,
+        "openIssues": 10,
+        "stars": 1303,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "react",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "react",
+        "latestVersion": "19.3.1",
+        "deprecated": null,
+        "unpublished": false,
+        "maintainers": [
+          "fb",
+          "react-bot"
+        ],
+        "lastPublishAt": "2026-10-31T09:15:39.748Z",
+        "createdAt": "2011-10-26T17:46:21.942Z",
+        "dependencyCount": 0,
+        "repositoryUrl": "https://github.com/react/react",
+        "github": {
+          "owner": "react",
+          "repo": "react"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 743344670,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "react/react",
+        "pushedAt": "2026-10-31T13:53:11Z",
+        "archived": false,
+        "openIssues": 1484,
+        "stars": 252068,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "express",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "express",
+        "latestVersion": "5.3.0",
+        "deprecated": null,
+        "unpublished": false,
+        "maintainers": [
+          "wesleytodd",
+          "jonchurch",
+          "ctcpip",
+          "ulisesgascon",
+          "sheplu"
+        ],
+        "lastPublishAt": "2026-10-09T12:56:54.505Z",
+        "createdAt": "2010-12-29T19:38:25.450Z",
+        "dependencyCount": 28,
+        "repositoryUrl": "https://github.com/expressjs/express",
+        "github": {
+          "owner": "expressjs",
+          "repo": "express"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 575482771,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "expressjs/express",
+        "pushedAt": "2026-11-01T09:58:22Z",
+        "archived": false,
+        "openIssues": 263,
+        "stars": 69584,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "lodash",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "lodash",
+        "latestVersion": "4.18.1",
+        "deprecated": null,
+        "unpublished": false,
+        "maintainers": [
+          "jdalton"
+        ],
+        "lastPublishAt": "2026-04-01T21:01:20.458Z",
+        "createdAt": "2012-04-23T16:37:11.912Z",
+        "dependencyCount": 0,
+        "repositoryUrl": "https://github.com/lodash/lodash",
+        "github": {
+          "owner": "lodash",
+          "repo": "lodash"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 636183624,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "lodash/lodash",
+        "pushedAt": "2026-10-01T23:04:09Z",
+        "archived": false,
+        "openIssues": 123,
+        "stars": 61272,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "ms",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "ms",
+        "latestVersion": "2.1.3",
+        "deprecated": null,
+        "unpublished": false,
+        "maintainers": [
+          "matheuss",
+          "rauchg",
+          "nick.tracey",
+          "vercel-release-bot",
+          "zeit-bot",
+          "matt.straka"
+        ],
+        "lastPublishAt": "2025-08-27T14:00:01.232Z",
+        "createdAt": "2011-12-21T19:38:08.664Z",
+        "dependencyCount": 0,
+        "repositoryUrl": "https://github.com/vercel/ms",
+        "github": {
+          "owner": "vercel",
+          "repo": "ms"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 2191354534,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "vercel/ms",
+        "pushedAt": "2026-05-20T22:24:50Z",
+        "archived": false,
+        "openIssues": 41,
+        "stars": 5559,
+        "ownerType": "Organization"
+      }
+    }
+  ]
+}
