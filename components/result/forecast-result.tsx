@@ -8,6 +8,7 @@ import type { AnalysisResult } from "@/lib/analysis/types";
 import { fmt, getMessages, plural } from "@/lib/i18n";
 import { headline, heroes, resultState, sentences, type ResultState } from "@/lib/narrative";
 import type { Forecast, ScoredPackage } from "@/lib/risk";
+import type { ShareSource } from "@/lib/share/links";
 import { CLOCK_START_MINUTES, DoomsdayClock } from "./doomsday-clock";
 import { InvisibleHeroes } from "./invisible-heroes";
 import { PackageDialog } from "./package-dialog";
@@ -20,6 +21,8 @@ import { easeOutCubic, progress, REVEAL, usePrefersReducedMotion, useRevealClock
 interface Props {
   analysis: AnalysisResult;
   projectName?: string;
+  /** Where this forecast lives; drives the share bar. */
+  share: { source: ShareSource; path: string };
   /** Warnings shown between the sentences and the treemap (quota, monorepo, truncation…). */
   notices?: ReactNode;
   onNewForecast: () => void;
@@ -28,7 +31,7 @@ interface Props {
 /** Riskiest first; packages without data last. */
 const byRisk = (a: ScoredPackage, b: ScoredPackage) => (b.risk?.risk ?? -1) - (a.risk?.risk ?? -1);
 
-export function ForecastResult({ analysis, projectName, notices, onNewForecast }: Props) {
+export function ForecastResult({ analysis, projectName, share, notices, onNewForecast }: Props) {
   const t = getMessages();
   const reduced = usePrefersReducedMotion();
   const [run, setRun] = useState(0);
@@ -97,7 +100,7 @@ export function ForecastResult({ analysis, projectName, notices, onNewForecast }
 
       <InvisibleHeroes heroes={story.heroes} />
 
-      <ShareBar />
+      <ShareBar source={share.source} path={share.path} packages={packages} forecast={forecast} />
 
       <details ref={listRef} className="group scroll-mt-6">
         <summary className="cursor-pointer font-mono text-xs tracking-[0.2em] text-fog uppercase marker:text-dim hover:text-bone">

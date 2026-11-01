@@ -9,6 +9,7 @@ import {
   ogImagePath,
   repoSourceFromRoute,
   sharePath,
+  shareSourceFor,
   sourceFromParams,
   sourceLabel,
   sourceParams,
@@ -158,5 +159,41 @@ describe("image and badge parameters", () => {
     expect(sourceLabel(list)).toBe("x");
     expect(sourceSlug(repo)).toBe("vercel-next.js-packages-next");
     expect(sourceSlug({ kind: "list", list: { dependencies: ["a"], devDependencies: [] } })).toBe("project");
+  });
+});
+
+describe("shareSourceFor", () => {
+  const parsed = {
+    ok: true as const,
+    projectName: "acme-internal",
+    packages: [
+      { name: "react", field: "dependencies" as const },
+      { name: "@acme/secret-sdk", field: "dependencies" as const },
+      { name: "vitest", field: "devDependencies" as const },
+    ],
+    skipped: [],
+    truncated: 0,
+  };
+
+  it("leaves packages npm couldn't find out of list links", () => {
+    const { source, excluded } = shareSourceFor(parsed, true, [
+      { name: "react", npmStatus: "ok" },
+      { name: "@acme/secret-sdk", npmStatus: "not-found" },
+      { name: "vitest", npmStatus: "error" },
+    ]);
+    expect(excluded).toEqual(["@acme/secret-sdk"]);
+    expect(source).toEqual({
+      kind: "list",
+      list: { projectName: "acme-internal", dependencies: ["react"], devDependencies: ["vitest"] },
+    });
+    expect(JSON.stringify(decodeList(sharePath(source).split("d=")[1]))).not.toContain("secret");
+  });
+
+  it("links repos by reference, whatever npm said", () => {
+    const { source, excluded } = shareSourceFor({ ...parsed, ref: { owner: "a", repo: "b" } }, false, [
+      { name: "@acme/secret-sdk", npmStatus: "not-found" },
+    ]);
+    expect(source).toEqual({ kind: "repo", ref: { owner: "a", repo: "b" }, includeDev: false });
+    expect(excluded).toEqual([]);
   });
 });

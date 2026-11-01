@@ -1,22 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { AnalysisProgress, progressText } from "@/components/analysis-progress";
-import { GitHubQuotaNotice } from "@/components/github-quota-notice";
 import { ErrorIcon, Spinner, UploadIcon } from "@/components/icons";
 import { MonorepoHint } from "@/components/monorepo-hint";
 import { PrivacyNotice } from "@/components/privacy-notice";
-import { ForecastResult } from "@/components/result/forecast-result";
 import { runAnalysis, type AnalysisOutcome } from "@/lib/analysis/client";
-import type { AnalysisResult } from "@/lib/analysis/types";
-import { fmt, getMessages, plural, type Messages } from "@/lib/i18n";
+import { fmt, getMessages, type Messages } from "@/lib/i18n";
 import { resolveInput } from "@/lib/input/resolve-client";
-import {
-  MAX_INPUT_BYTES,
-  MAX_PACKAGES,
-  type ParseSuccess,
-  type ResolveResponse,
-} from "@/lib/input/types";
+import { MAX_INPUT_BYTES, type ParseSuccess, type ResolveResponse } from "@/lib/input/types";
+import { recallInput, rememberInput, stashForecast } from "@/lib/share/handoff";
+import { sharePath, shareSourceFor } from "@/lib/share/links";
 
 const EXAMPLES = [
   { label: "expressjs/express", input: "https://github.com/expressjs/express" },
@@ -47,15 +42,10 @@ function errorText(
   if (result.error === "no-dependencies" && !includeDev && !result.monorepo) {
     return t.errors["no-dependencies-try-dev"];
   }
-  return fmt(t.errors[result.error], { location: result.location ?? "package.json" });
-}
-
-/** "Doomsday score 82/100. 8 minutes to midnight. 28 packages analyzed." */
-function resultAnnouncement(t: Messages, result: AnalysisResult) {
-  const { score, minutesToMidnight } = result.forecast;
-  const analyzed = plural(t.preview.analyzed, result.packages.length);
-  if (score === null || minutesToMidnight === null) return `${t.forecast.noScore} ${analyzed}.`;
-  return `${t.forecast.scoreLabel} ${score}${t.forecast.outOf}. ${plural(t.forecast.minutes, minutesToMidnight)}. ${analyzed}.`;
+  return fmt(t.errors[result.error], {
+    location: result.location ?? "package.json",
+    seconds: result.retryAfter ?? 60,
+  });
 }
 
 function formatBytes(bytes: number) {
@@ -65,8 +55,10 @@ function formatBytes(bytes: number) {
 export function ForecastForm({ hero }: { hero?: ReactNode }) {
   const t = getMessages();
   const ids = useId();
-  const [text, setText] = useState("");
-  const [includeDev, setIncludeDev] = useState(false);
+  const router = useRouter();
+  // Coming back from a result restores what was in the form.
+  const [text, setText] = useState(() => recallInput().text);
+  const [includeDev, setIncludeDev] = useState(() => recallInput().includeDev);
   const [file, setFile] = useState<{ name: string; size: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -110,7 +102,15 @@ export function ForecastForm({ hero }: { hero?: ReactNode }) {
           );
         },
       });
-      if (!signal.aborted) setStatus({ kind: "done", parsed, includeDev: dev, analysis });
+      if (signal.aborted) return;
+      if (!analysis.ok) return setStatus({ kind: "done", parsed, includeDev: dev, analysis });
+
+      // Every result lives at its share link: reloadable and ready to copy.
+      const { source } = shareSourceFor(parsed, dev, analysis.result.packages);
+      const path = sharePath(source);
+      stashForecast(path, { parsed, analysis: analysis.result });
+      rememberInput(input, dev);
+      router.push(path);
     } catch {
       // Aborted by a newer request.
     }
@@ -186,76 +186,20 @@ export function ForecastForm({ hero }: { hero?: ReactNode }) {
       : !status.parsed.ok
         ? errorText(t, status.parsed, status.includeDev)
         : analysis && !analysis.ok
-          ? t.errors[analysis.error]
+          ? fmt(t.errors[analysis.error], {
+              seconds: analysis.error === "rate-limited" ? analysis.retryAfter : 0,
+            })
           : null;
   const announcement =
     status.kind !== "done"
       ? ""
-      : [
-          failure ?? (analysis?.ok ? resultAnnouncement(t, analysis.result) : ""),
-          status.parsed.monorepo ? t.monorepo.message : "",
-        ].join(" ");
+      : [failure ?? "", status.parsed.monorepo ? t.monorepo.message : ""].join(" ");
 
   const statusRegion = (
     <p role="status" className="sr-only">
       {announcement}
     </p>
   );
-
-  if (status.kind === "done" && status.parsed.ok && analysis?.ok) {
-    const { parsed: done } = status;
-    const result = analysis.result;
-    const rateLimited = result.packages.filter((p) => p.githubStatus === "rate-limited").length;
-    return (
-      <>
-        {statusRegion}
-        <div className="pt-6 sm:pt-12">
-          <ForecastResult
-            analysis={result}
-            projectName={done.projectName}
-            onNewForecast={() => setStatus({ kind: "idle" })}
-            notices={
-              <>
-                <GitHubQuotaNotice quota={result.github} skipped={rateLimited} />
-                {done.monorepo && (
-                  <MonorepoHint
-                    monorepo={done.monorepo}
-                    githubRef={done.ref}
-                    onUseExample={applyExampleUrl}
-                  />
-                )}
-                {done.truncated > 0 && (
-                  <p className="border-l-2 border-amber pl-3 text-sm text-amber">
-                    {plural(t.preview.truncated, done.truncated, { max: MAX_PACKAGES })}
-                  </p>
-                )}
-                {result.forecast.unscored > 0 && (
-                  <p className="border-l-2 border-line-strong pl-3 text-sm text-fog">
-                    {plural(t.preview.noData, result.forecast.unscored)}
-                  </p>
-                )}
-                {done.skipped.length > 0 && (
-                  <details>
-                    <summary className="cursor-pointer font-mono text-xs text-fog marker:text-dim hover:text-bone">
-                      {plural(t.preview.skipped, done.skipped.length)}
-                    </summary>
-                    <ul className="mt-3 space-y-1 font-mono text-xs">
-                      {done.skipped.map((s) => (
-                        <li key={`${s.field}:${s.name}`} className="flex flex-wrap gap-x-2">
-                          <span className="text-bone">{s.name}</span>
-                          <span className="text-dim">— {t.skipReasons[s.reason]}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-              </>
-            }
-          />
-        </div>
-      </>
-    );
-  }
 
   return (
     <>

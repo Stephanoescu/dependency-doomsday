@@ -1,7 +1,8 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
 import { parseGitHubRef } from "@/lib/input/github-url";
 import { isValidPackageName } from "@/lib/input/package-json";
-import { MAX_PACKAGES, type Dependency, type GitHubRef } from "@/lib/input/types";
+import type { PackageData } from "@/lib/analysis/types";
+import { MAX_PACKAGES, type Dependency, type GitHubRef, type ParseSuccess } from "@/lib/input/types";
 
 /**
  * Shareable links carry everything needed to recompute a forecast; there is
@@ -139,4 +140,30 @@ export function sourceLabel(source: ShareSource): string | undefined {
 export function sourceSlug(source: ShareSource): string {
   const label = sourceLabel(source) ?? "project";
   return label.replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "project";
+}
+
+/**
+ * The link for a fresh forecast. Pasted package.json files become a list of
+ * names, minus any npm couldn't find: those are likely private, internal names.
+ */
+export function shareSourceFor(
+  parsed: ParseSuccess & { ref?: GitHubRef },
+  includeDev: boolean,
+  packages: Pick<PackageData, "name" | "npmStatus">[],
+): { source: ShareSource; excluded: string[] } {
+  if (parsed.ref) return { source: { kind: "repo", ref: parsed.ref, includeDev }, excluded: [] };
+  const missing = new Set(packages.filter((p) => p.npmStatus === "not-found").map((p) => p.name));
+  const names = (field: Dependency["field"]) =>
+    parsed.packages.filter((p) => p.field === field && !missing.has(p.name)).map((p) => p.name);
+  return {
+    source: {
+      kind: "list",
+      list: {
+        ...(parsed.projectName && { projectName: parsed.projectName }),
+        dependencies: names("dependencies"),
+        devDependencies: names("devDependencies"),
+      },
+    },
+    excluded: [...missing],
+  };
 }

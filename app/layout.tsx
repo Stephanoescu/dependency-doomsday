@@ -3,6 +3,7 @@ import { Archivo, JetBrains_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { defaultLocale, getMessages } from "@/lib/i18n";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -22,6 +23,15 @@ export const metadata: Metadata = {
   title: { default: t.meta.title, template: `%s — ${t.brand.name}` },
   description: t.meta.description,
   applicationName: t.brand.name,
+  metadataBase: new URL(siteUrl()),
+  openGraph: {
+    siteName: t.brand.name,
+    title: t.meta.title,
+    description: t.meta.description,
+    images: [{ url: "/api/og", width: 1200, height: 630, alt: t.meta.title }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", images: ["/api/og"] },
 };
 
 export const viewport: Viewport = {
