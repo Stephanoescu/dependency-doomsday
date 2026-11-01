@@ -6,7 +6,7 @@ const t = getMessages();
 
 describe("describeRule", () => {
   it("describes simple rules", () => {
-    expect(describeRule({ id: "single-maintainer", points: 30 }, t)).toBe("Single maintainer");
+    expect(describeRule({ id: "single-maintainer", points: 30 }, t)).toBe("Single npm maintainer");
     expect(describeRule({ id: "no-repo", points: 10 }, t)).toBe("No repository linked");
   });
 

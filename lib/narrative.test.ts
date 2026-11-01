@@ -67,7 +67,7 @@ describe("headline", () => {
       critical("lodash", 636_183_624),
     );
     expect(h).toBe(
-      "Your most critical dependency (**lodash**, 636.2M downloads/month) is maintained by **1 person**.",
+      "Your most critical dependency (**lodash**, 636.2M downloads/month) has **a single npm maintainer**.",
     );
   });
 
@@ -95,12 +95,12 @@ describe("headline", () => {
   it("3. is skipped when only possibly-finished or green packages are left", () => {
     // finishedRed is red but possibly finished; the next priority (single maintainer) takes over.
     const { headline: h } = run(finishedRed("done-thing"), healthy("react", 700_000_000));
-    expect(h).toBe("**done-thing** (1K downloads/month) is maintained by **1 person**.");
+    expect(h).toBe("**done-thing** (1K downloads/month) has **a single npm maintainer**.");
   });
 
   it("4. then the most-downloaded single-maintainer package", () => {
     expect(run(solo("a", 10), solo("b", 900_000), healthy("c")).headline).toBe(
-      "**b** (900K downloads/month) is maintained by **1 person**.",
+      "**b** (900K downloads/month) has **a single npm maintainer**.",
     );
   });
 
@@ -133,7 +133,7 @@ describe("sentences", () => {
     );
     expect(s).toEqual([
       "5 dependencies checked: 1 high risk, 2 to watch, 2 low risk.",
-      "2 hang on a single maintainer — 1 of them critical, with over 1M downloads a month.",
+      "2 have a single npm maintainer — 1 of them critical, with over 1M downloads a month.",
       "The oldest release is 8 years old (is-number).",
       "1 package scored without GitHub data.",
     ]);
@@ -146,7 +146,7 @@ describe("sentences", () => {
   });
 
   it("uses the single-maintainer wording without critical packages", () => {
-    expect(run(solo("a", 10)).sentences[1]).toBe("1 hangs on a single maintainer.");
+    expect(run(solo("a", 10)).sentences[1]).toBe("1 has a single npm maintainer.");
   });
 
   it("explains missing data instead of summarizing", () => {

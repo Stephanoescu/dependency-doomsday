@@ -6,7 +6,7 @@ export const en = {
   meta: {
     title: "Dependency Doomsday — How close is your project to midnight?",
     description:
-      "Paste your package.json and get a doomsday forecast: which dependencies are abandoned, which hang on a single maintainer, and which are critical.",
+      "Paste your package.json and get a doomsday forecast: which dependencies are abandoned, which have a single npm maintainer, and which are critical.",
   },
 
   brand: {
@@ -110,7 +110,7 @@ export const en = {
   },
 
   facts: {
-    maintainers: { one: "{count} maintainer", other: "{count} maintainers" },
+    maintainers: { one: "{count} npm maintainer", other: "{count} npm maintainers" },
     lastRelease: "released {time}",
     downloads: "{count}/month",
     pushed: "pushed {time}",
@@ -147,8 +147,8 @@ export const en = {
       other: "{count} packages scored without GitHub data.",
     },
     critical: {
-      one: "{count} critical package: one maintainer, over 1M downloads a month.",
-      other: "{count} critical packages: one maintainer each, over 1M downloads a month.",
+      one: "{count} critical package: a single npm maintainer, over 1M downloads a month.",
+      other: "{count} critical packages: a single npm maintainer each, over 1M downloads a month.",
     },
     methodology: "Methodology v{version}",
   },
@@ -157,13 +157,13 @@ export const en = {
     /** The worst finding, read first. See headline() in lib/narrative.ts for the priorities. */
     headline: {
       critical:
-        "Your most critical dependency (**{name}**, {downloads} downloads/month) is maintained by **1 person**.",
+        "Your most critical dependency (**{name}**, {downloads} downloads/month) has **a single npm maintainer**.",
       deprecated: "**{name}**, one of your dependencies, is **deprecated**.",
       archived: "**{name}**, one of your dependencies, lives in an **archived** repo.",
       unpublished: "**{name}**, one of your dependencies, was **unpublished** from npm.",
       "stale-release": "**{name}** hasn't had a release in **{age}**.",
       "stale-push": "Nobody has pushed to **{name}**'s repo in **{age}**.",
-      "single-maintainer": "**{name}** ({downloads} downloads/month) is maintained by **1 person**.",
+      "single-maintainer": "**{name}** ({downloads} downloads/month) has **a single npm maintainer**.",
       "no-repo": "**{name}** has no public source repository.",
       watch: {
         one: "Nothing is on fire, but **{count} dependency** needs watching.",
@@ -182,18 +182,18 @@ export const en = {
         other: "{count} dependencies checked: {high} high risk, {mid} to watch, {low} low risk.",
       },
       singleMaintainer: {
-        one: "1 hangs on a single maintainer.",
-        other: "{count} hang on a single maintainer.",
+        one: "1 has a single npm maintainer.",
+        other: "{count} have a single npm maintainer.",
       },
       singleMaintainerCritical: {
-        one: "1 hangs on a single maintainer, and it's critical: over 1M downloads a month.",
-        other: "{count} hang on a single maintainer — {critical} of them critical, with over 1M downloads a month.",
+        one: "1 has a single npm maintainer, and it's critical: over 1M downloads a month.",
+        other: "{count} have a single npm maintainer — {critical} of them critical, with over 1M downloads a month.",
       },
       oldest: "The oldest release is {age} old ({name}).",
       insufficient:
         "Only {scored} of {total} packages could be checked — npm may be having trouble. Try again in a minute.",
     },
-    allClearNote: "Every dependency has recent releases, more than one maintainer or a clean bill of health.",
+    allClearNote: "Every dependency has recent releases, more than one npm maintainer or a clean bill of health.",
     scoreSr: "Doomsday score: {score} out of 100. {minutes}.",
     unknownScore: "?",
     replay: "Replay",
@@ -221,7 +221,7 @@ export const en = {
     noRules: "No risk rules apply. Healthy by every measure we check.",
     noData: "npm didn't answer for this package, so it isn't scored.",
     evidence: "Evidence",
-    maintainers: "Maintainers",
+    maintainers: "npm maintainers",
     npm: "npm page",
     repo: "Repository",
     support: "Support",
@@ -231,7 +231,7 @@ export const en = {
     title: "Invisible heroes",
     intro:
       "These packages hold your project up, often on someone's free time. A thank-you, a fix or a sponsorship goes a long way.",
-    maintainedBy: "Maintained by",
+    maintainedBy: "Published on npm by",
     andMore: "+{count} more",
     support: "Support",
     supportSr: "Support {name}",
@@ -254,7 +254,7 @@ export const en = {
     deprecated: "Deprecated on npm",
     unpublished: "Unpublished from npm",
     archived: "Repo archived on GitHub",
-    "single-maintainer": "Single maintainer",
+    "single-maintainer": "Single npm maintainer",
     "stale-release": "Last release {age} ago",
     "stale-push": "No GitHub push in {age}",
     "no-repo": "No repository linked",
@@ -316,7 +316,7 @@ export const en = {
     sources: {
       title: "What we look at",
       items: [
-        "**npm registry**: maintainers, release dates, deprecation, the linked repository and how many dependencies the latest version has.",
+        "**npm registry**: maintainers (the people allowed to publish the package), release dates, deprecation, the linked repository and how many dependencies the latest version has.",
         "**npm downloads**: downloads in the last month.",
         "**GitHub**: last push, whether the repo is archived, and open issues.",
       ],
@@ -330,13 +330,15 @@ export const en = {
       ruleHeader: "Rule",
       pointsHeader: "Points",
       terminalPoints: "= {max}",
+      maintainersNote:
+        "**Maintainers** are the people with permission to publish the package on npm. They aren't always the ones writing the code, but they are the ones who can ship — or break — a release.",
       rows: {
         terminal: {
           rule: "Deprecated or unpublished on npm, or the GitHub repo is archived",
           why: "The authors have said it's over. No more fixes, security fixes included.",
         },
         singleMaintainer: {
-          rule: "Only one maintainer on npm",
+          rule: "A single npm maintainer",
           why: "One burnout, lost laptop or hijacked account away from trouble. That's how xz happened.",
         },
         releaseOld: {
@@ -379,7 +381,7 @@ export const en = {
 
     critical: {
       title: "Critical packages",
-      body: "A package is **critical** when it has a single maintainer and more than {downloads} downloads a month: a big slice of the internet rests on one person. Critical packages count double in the project score.",
+      body: "A package is **critical** when it has a single npm maintainer and more than {downloads} downloads a month: a big slice of the internet rests on one account. Critical packages count double in the project score.",
     },
 
     project: {

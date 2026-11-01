@@ -117,6 +117,9 @@ export default function MethodologyPage() {
               ))}
             </tbody>
           </table>
+          <p className="text-sm">
+            <Rich text={m.package.maintainersNote} />
+          </p>
         </Section>
 
         <Section n={++n} title={m.discounts.title}>
