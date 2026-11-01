@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractNpmInfo } from "./packument";
+import { extractNpmInfo, parseFunding } from "./packument";
 
 const leftPad = {
   name: "left-pad",
@@ -33,6 +33,7 @@ describe("extractNpmInfo", () => {
       lastPublishAt: "2018-04-09T00:00:00.000Z",
       createdAt: "2014-03-14T00:00:00.000Z",
       dependencyCount: 0,
+      funding: [],
       repositoryUrl: "https://github.com/stevemao/left-pad",
       github: { owner: "stevemao", repo: "left-pad" },
     });
@@ -115,5 +116,44 @@ describe("extractNpmInfo", () => {
       repositoryUrl: null,
       github: null,
     });
+  });
+});
+
+describe("parseFunding", () => {
+  it("accepts a URL, an object or an array of either", () => {
+    expect(parseFunding("https://github.com/sponsors/sindresorhus")).toEqual([
+      { url: "https://github.com/sponsors/sindresorhus", type: null },
+    ]);
+    expect(parseFunding({ type: "OpenCollective", url: "https://opencollective.com/express" })).toEqual([
+      { url: "https://opencollective.com/express", type: "opencollective" },
+    ]);
+    expect(
+      parseFunding([
+        { type: "github", url: "https://github.com/sponsors/a" },
+        "https://patreon.com/a",
+      ]).map((l) => l.url),
+    ).toEqual(["https://github.com/sponsors/a", "https://patreon.com/a"]);
+  });
+
+  it("only keeps http(s) links, upgraded to https", () => {
+    expect(parseFunding(["javascript:alert(1)", "ftp://x.org", "not a url", "http://ko-fi.com/a"])).toEqual([
+      { url: "https://ko-fi.com/a", type: null },
+    ]);
+  });
+
+  it("dedupes, caps at 3 and survives garbage", () => {
+    const many = ["https://a.com/", "https://a.com/", "https://b.com/", "https://c.com/", "https://d.com/"];
+    expect(parseFunding(many).map((l) => l.url)).toEqual(["https://a.com/", "https://b.com/", "https://c.com/"]);
+    expect(parseFunding(undefined)).toEqual([]);
+    expect(parseFunding(42)).toEqual([]);
+    expect(parseFunding({ type: "github" })).toEqual([]);
+  });
+
+  it("is read from the latest version", () => {
+    const doc = {
+      "dist-tags": { latest: "2.0.0" },
+      versions: { "1.0.0": { funding: "https://old.example/" }, "2.0.0": { funding: "https://new.example/" } },
+    };
+    expect(extractNpmInfo("x", doc).funding).toEqual([{ url: "https://new.example/", type: null }]);
   });
 });

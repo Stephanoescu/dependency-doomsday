@@ -10,7 +10,7 @@ export const TTL = {
 } as const;
 
 /** Bump the version to invalidate every cached entry after a shape change. */
-const PREFIX = "dd:v2:";
+const PREFIX = "dd:v3:";
 
 export const cacheKey = {
   npm: (name: string) => `${PREFIX}npm:${name}`,

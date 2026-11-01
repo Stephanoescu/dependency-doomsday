@@ -16,10 +16,18 @@ export interface NpmInfo {
   createdAt: string | null;
   /** Runtime dependencies declared by the latest version; null when it can't be read. */
   dependencyCount: number | null;
+  /** Funding links of the latest version (https only), e.g. GitHub Sponsors or Open Collective. */
+  funding: FundingLink[];
   /** Normalized https URL of the linked repository, or null when none is linked. */
   repositoryUrl: string | null;
   /** Set when the repository is on GitHub. */
   github: { owner: string; repo: string } | null;
+}
+
+export interface FundingLink {
+  url: string;
+  /** "github", "opencollective", "patreon"… when the package says so. */
+  type: string | null;
 }
 
 /** The only GitHub /repos fields we keep (and cache). */

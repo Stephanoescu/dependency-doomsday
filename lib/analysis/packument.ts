@@ -1,5 +1,5 @@
 import { parseRepositoryField } from "./repository";
-import type { NpmInfo } from "./types";
+import type { FundingLink, NpmInfo } from "./types";
 
 type Doc = Record<string, unknown>;
 
@@ -11,6 +11,35 @@ function isoOrNull(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const time = Date.parse(value);
   return Number.isNaN(time) ? null : new Date(time).toISOString();
+}
+
+const MAX_FUNDING_LINKS = 3;
+
+/** Only http(s) URLs survive (upgraded to https), so nothing like javascript: reaches a link. */
+function safeUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    url.protocol = "https:";
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/** The package.json "funding" field: a URL, { type, url }, or an array of either. */
+export function parseFunding(field: unknown): FundingLink[] {
+  const entries = Array.isArray(field) ? field : [field];
+  const links: FundingLink[] = [];
+  for (const entry of entries) {
+    const url = safeUrl(isObject(entry) ? entry.url : entry);
+    if (!url || links.some((l) => l.url === url)) continue;
+    const type = isObject(entry) && typeof entry.type === "string" && entry.type.trim() ? entry.type.trim().toLowerCase() : null;
+    links.push({ url, type });
+    if (links.length === MAX_FUNDING_LINKS) break;
+  }
+  return links;
 }
 
 /**
@@ -65,6 +94,7 @@ export function extractNpmInfo(name: string, doc: unknown): NpmInfo {
     lastPublishAt: Number.isFinite(lastPublish) ? new Date(lastPublish).toISOString() : null,
     createdAt: isoOrNull(time.created),
     dependencyCount,
+    funding: parseFunding(latest?.funding),
     repositoryUrl: repository.url,
     github: repository.github,
   };

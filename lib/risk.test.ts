@@ -34,6 +34,7 @@ function pkg({ npm, github, downloads = 1_000, githubStatus }: Overrides = {}): 
     lastPublishAt: ago(1),
     createdAt: ago(100),
     dependencyCount: 2,
+    funding: [],
     repositoryUrl: "https://github.com/acme/pkg",
     github: { owner: "acme", repo: "pkg" },
     ...npm,
