@@ -63,7 +63,6 @@ function pkg({ npm, github, downloads = 1_000, githubStatus }: Overrides = {}): 
 }
 
 const score = (overrides?: Overrides) => scorePackage(pkg(overrides), NOW)!;
-const ruleIds = (overrides?: Overrides) => score(overrides).rules.map((r) => r.id);
 
 describe("riskLevel", () => {
   it("is green 0–29, yellow 30–59 and red from 60", () => {
