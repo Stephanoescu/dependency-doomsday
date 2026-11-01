@@ -1,6 +1,6 @@
 import type { FundingLink } from "@/lib/analysis/types";
 import { formatCompact, formatMonths } from "@/lib/format";
-import { fmt, plural, type Messages } from "@/lib/i18n";
+import { fmt, plural, type Messages, type Plural } from "@/lib/i18n";
 import type { AppliedRule, Forecast, PackageRisk, ScoredPackage } from "@/lib/risk";
 
 /**
@@ -38,19 +38,34 @@ function topRule(risk: PackageRisk): AppliedRule | null {
   return risk.rules.reduce<AppliedRule | null>((top, rule) => (!top || rule.points > top.points ? rule : top), null);
 }
 
-function ruleHeadline(p: Scored, rule: AppliedRule, t: Messages): string {
-  const h = t.result.headline;
-  const name = p.name;
-  switch (rule.id) {
-    case "stale-release":
-      return fmt(h["stale-release"], { name, age: formatMonths(rule.months) });
-    case "stale-push":
-      return fmt(h["stale-push"], { name, age: formatMonths(rule.months) });
-    case "single-maintainer":
-      return fmt(h["single-maintainer"], { name, downloads: formatCompact(p.downloads ?? 0) });
-    default:
-      return fmt(h[rule.id], { name });
-  }
+/** Headlines that name a package. */
+export type NamedFinding =
+  | "critical"
+  | "deprecated"
+  | "archived"
+  | "unpublished"
+  | "stale-release"
+  | "stale-push"
+  | "single-maintainer"
+  | "no-repo";
+
+export type Finding =
+  | { kind: NamedFinding; name: string; downloads: number; months?: number }
+  | { kind: "watch"; count: number }
+  | { kind: "all-clear"; count: number }
+  | { kind: "insufficient"; unscored: number; total: number };
+
+/** The message set a finding is written with: the result page, or first-person share texts. */
+export type HeadlineMessages = Record<NamedFinding, string> & {
+  watch: Plural;
+  allClear: Plural;
+  insufficient: string;
+};
+
+function ruleFinding(p: Scored, rule: AppliedRule): Finding {
+  const base = { name: p.name, downloads: p.downloads ?? 0 };
+  if (rule.id === "stale-release" || rule.id === "stale-push") return { kind: rule.id, ...base, months: rule.months };
+  return { kind: rule.id, ...base };
 }
 
 /**
@@ -61,37 +76,51 @@ function ruleHeadline(p: Scored, rule: AppliedRule, t: Messages): string {
  * 4. the most-downloaded single-maintainer package;
  * then a general line for yellow-only results, all-clear or insufficient data.
  */
-export function headline(packages: ScoredPackage[], forecast: Forecast, t: Messages): string {
-  const h = t.result.headline;
+export function findHeadline(packages: ScoredPackage[], forecast: Forecast): Finding {
   const state = resultState(forecast, packages.length);
-  if (state === "insufficient") {
-    return fmt(h.insufficient, { unscored: forecast.unscored, total: packages.length });
-  }
-  if (state === "all-clear") return plural(h.allClear, forecast.scored);
+  if (state === "insufficient") return { kind: "insufficient", unscored: forecast.unscored, total: packages.length };
+  if (state === "all-clear") return { kind: "all-clear", count: forecast.scored };
 
   const scored = scoredOnly(packages);
+  const named = (kind: NamedFinding, p: Scored): Finding => ({ kind, name: p.name, downloads: p.downloads ?? 0 });
 
   const critical = scored.filter((p) => p.risk.critical).sort(byDownloads)[0];
-  if (critical) {
-    return fmt(h.critical, { name: critical.name, downloads: formatCompact(critical.downloads ?? 0) });
-  }
+  if (critical) return named("critical", critical);
 
   const terminal = scored
     .filter((p) => p.risk.rules.some((r) => (TERMINAL as readonly string[]).includes(r.id)))
     .sort(byDownloads)[0];
-  if (terminal) {
-    const id = TERMINAL.find((id) => terminal.risk.rules.some((r) => r.id === id))!;
-    return fmt(h[id], { name: terminal.name });
-  }
+  if (terminal) return named(TERMINAL.find((id) => terminal.risk.rules.some((r) => r.id === id))!, terminal);
 
   const red = scored.filter((p) => p.risk.level === "high" && isConcerning(p)).sort(byRiskThenDownloads)[0];
   const redRule = red && topRule(red.risk);
-  if (red && redRule) return ruleHeadline(red, redRule, t);
+  if (red && redRule) return ruleFinding(red, redRule);
 
   const solo = scored.filter((p) => p.npm?.maintainers.length === 1).sort(byDownloads)[0];
-  if (solo) return fmt(h["single-maintainer"], { name: solo.name, downloads: formatCompact(solo.downloads ?? 0) });
+  if (solo) return named("single-maintainer", solo);
 
-  return plural(h.watch, forecast.levels.mid);
+  return { kind: "watch", count: forecast.levels.mid };
+}
+
+export function writeFinding(finding: Finding, messages: HeadlineMessages): string {
+  switch (finding.kind) {
+    case "insufficient":
+      return fmt(messages.insufficient, { unscored: finding.unscored, total: finding.total });
+    case "all-clear":
+      return plural(messages.allClear, finding.count);
+    case "watch":
+      return plural(messages.watch, finding.count);
+    default:
+      return fmt(messages[finding.kind], {
+        name: finding.name,
+        downloads: formatCompact(finding.downloads),
+        age: formatMonths(finding.months ?? 0),
+      });
+  }
+}
+
+export function headline(packages: ScoredPackage[], forecast: Forecast, t: Messages): string {
+  return writeFinding(findHeadline(packages, forecast), t.result.headline);
 }
 
 /** 3–4 sentences with numbers. Each is left out when it has nothing to say. */

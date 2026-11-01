@@ -7,6 +7,10 @@ export const TTL = {
   data: 24 * HOUR,
   /** "Not found" answers: shorter, a package or repo may appear later. */
   missing: 6 * HOUR,
+  /** Computed forecast summaries, for share images and badges. */
+  summary: 6 * HOUR,
+  /** Dependency lists read from a repo's package.json. */
+  deps: HOUR,
 } as const;
 
 /** Bump the version to invalidate every cached entry after a shape change. */
@@ -16,6 +20,8 @@ export const cacheKey = {
   npm: (name: string) => `${PREFIX}npm:${name}`,
   downloads: (name: string) => `${PREFIX}dl:${name}`,
   github: (owner: string, repo: string) => `${PREFIX}gh:${owner}/${repo}`.toLowerCase(),
+  summary: (depsHash: string) => `${PREFIX}sum:${depsHash}`,
+  repoDeps: (ref: string) => `${PREFIX}deps:${ref.toLowerCase()}`,
 };
 
 export interface CacheWrite {

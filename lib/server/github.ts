@@ -211,6 +211,7 @@ export async function fetchPackageJsonFromGitHub(ref: GitHubRef): Promise<FetchP
 
   if (res.status === 404) {
     const exists = await repoExists(ref);
+    if (exists === undefined) return { ok: false, error: "github-unavailable" };
     return { ok: false, error: exists ? "package-json-not-found" : "repo-not-found" };
   }
   if (res.status === 429 || res.status === 403) return { ok: false, error: "github-rate-limited" };
