@@ -1,5 +1,6 @@
 import type { AnalysisResult, GitHubRepoInfo, NpmInfo, PackageData } from "@/lib/analysis/types";
 import type { Dependency } from "@/lib/input/types";
+import { forecast } from "@/lib/risk";
 import { cacheKey, getCache, TTL, type CacheWrite } from "./cache";
 import { createGitHubBudget, fetchRepo, type GitHubBudget, type RepoLookup } from "./github";
 import { createLimiter, MAX_CONCURRENCY, type Limiter } from "./limiter";
@@ -16,8 +17,8 @@ export interface AnalyzeOptions {
 }
 
 /**
- * Collects npm registry, npm downloads and GitHub data for each package.
- * Never throws for a failing source: the package gets an error status and
+ * Collects npm registry, npm downloads and GitHub data for each package,
+ * then scores it with the risk rules (lib/risk.ts). Never throws for a failing source: the package gets an error status and
  * the analysis continues.
  */
 export async function analyzePackages(
@@ -82,7 +83,12 @@ export async function analyzePackages(
     };
   });
 
-  return { packages, github: budget.snapshot(), generatedAt: new Date().toISOString() };
+  const now = new Date();
+  return {
+    ...forecast(packages, now.getTime()),
+    github: budget.snapshot(),
+    generatedAt: now.toISOString(),
+  };
 }
 
 async function loadNpm(
