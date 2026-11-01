@@ -219,6 +219,20 @@ describe("parsePackageJson", () => {
       });
     });
 
+    it("uses external workspace globs (pnpm, lerna) when package.json has none", () => {
+      const result = parsePackageJson(pkg({ name: "root", dependencies: { a: "1" } }), {
+        externalWorkspaces: ["packages/*"],
+      });
+      expect(result.ok && result.monorepo).toEqual({ workspaces: ["packages/*"] });
+    });
+
+    it("prefers package.json workspaces over external globs", () => {
+      const result = parsePackageJson(pkg({ workspaces: ["apps/*"], dependencies: { a: "1" } }), {
+        externalWorkspaces: ["packages/*"],
+      });
+      expect(result.ok && result.monorepo).toEqual({ workspaces: ["apps/*"] });
+    });
+
     it("does not flag packages without workspaces", () => {
       const result = parsePackageJson(pkg({ dependencies: { a: "1" } }));
       expect(result.ok && result.monorepo).toBeUndefined();

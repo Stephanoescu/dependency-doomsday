@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { formatGitHubRef, looksLikeOtherHostUrl, parseGitHubRef } from "@/lib/input/github-url";
 import { parsePackageJson } from "@/lib/input/package-json";
-import type { InputErrorCode, ResolveResponse } from "@/lib/input/types";
-import { fetchPackageJsonFromGitHub } from "@/lib/server/github";
+import {
+  MONOREPO_DEPENDENCY_THRESHOLD,
+  type InputErrorCode,
+  type ParseResult,
+  type ResolveResponse,
+} from "@/lib/input/types";
+import { fetchExternalWorkspaces, fetchPackageJsonFromGitHub } from "@/lib/server/github";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
@@ -22,6 +27,14 @@ const STATUS: Partial<Record<InputErrorCode, number>> = {
   "github-unavailable": 502,
   "too-large": 413,
 };
+
+/** Cheap pre-check so ordinary repos don't pay for two extra file reads. */
+function mightBeMonorepoRoot(result: ParseResult): boolean {
+  if (result.monorepo) return false;
+  if (!result.ok) return result.error === "no-dependencies";
+  const runtime = result.packages.filter((p) => p.field === "dependencies").length;
+  return runtime < MONOREPO_DEPENDENCY_THRESHOLD;
+}
 
 function reply(body: ResolveResponse) {
   const status = body.ok ? 200 : (STATUS[body.error] ?? 422);
@@ -64,5 +77,12 @@ export async function POST(request: Request) {
     });
   }
 
-  return reply({ ...parsePackageJson(fetched.text, { includeDev: body.data.includeDev }), ref });
+  const options = { includeDev: body.data.includeDev };
+  let result = parsePackageJson(fetched.text, options);
+  // pnpm and Lerna declare workspaces outside package.json; they live at the repo root.
+  if (!ref.path && mightBeMonorepoRoot(result)) {
+    const externalWorkspaces = await fetchExternalWorkspaces(ref);
+    if (externalWorkspaces) result = parsePackageJson(fetched.text, { ...options, externalWorkspaces });
+  }
+  return reply({ ...result, ref });
 }

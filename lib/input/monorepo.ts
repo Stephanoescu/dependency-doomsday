@@ -11,11 +11,11 @@ export function workspaceDir(workspaces: string[]): string {
 
 /**
  * Example URL for the monorepo hint, ending in "/" so the user can type the package name.
- * Uses the real repo when known; branch defaults to "main".
+ * Uses the real repo when known. HEAD makes GitHub resolve the default branch.
  */
 export function monorepoExampleUrl(workspaces: string[], ref?: GitHubRef): string {
   const base = ref
     ? `https://github.com/${ref.owner}/${ref.repo}`
     : "https://github.com/your-org/your-repo";
-  return `${base}/tree/${ref?.ref ?? "main"}/${workspaceDir(workspaces)}/`;
+  return `${base}/tree/${ref?.ref ?? "HEAD"}/${workspaceDir(workspaces)}/`;
 }

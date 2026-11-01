@@ -86,8 +86,11 @@ export function gitHubWebUrl(ref: GitHubRef): string {
   return `https://github.com/${formatGitHubRef(ref)}`;
 }
 
-/** raw.githubusercontent.com does not count against the GitHub API rate limit. */
-export function rawPackageJsonUrl({ owner, repo, ref, path }: GitHubRef): string {
-  const segments = [owner, repo, ref ?? "HEAD", ...(path ? path.split("/") : []), "package.json"];
+/**
+ * URL of a file in the ref's directory (package.json by default) on
+ * raw.githubusercontent.com, which does not count against the GitHub API rate limit.
+ */
+export function rawFileUrl({ owner, repo, ref, path }: GitHubRef, file = "package.json"): string {
+  const segments = [owner, repo, ref ?? "HEAD", ...(path ? path.split("/") : []), file];
   return `https://raw.githubusercontent.com/${segments.map(encodeURIComponent).join("/")}`;
 }

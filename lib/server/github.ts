@@ -1,5 +1,6 @@
-import { rawPackageJsonUrl } from "@/lib/input/github-url";
+import { rawFileUrl } from "@/lib/input/github-url";
 import { MAX_INPUT_BYTES, type GitHubRef, type InputErrorCode } from "@/lib/input/types";
+import { parseLernaJson, parsePnpmWorkspaceYaml } from "@/lib/input/workspaces";
 
 const TIMEOUT_MS = 8_000;
 const USER_AGENT = "dependency-doomsday";
@@ -46,7 +47,7 @@ export type FetchPackageJsonResult =
 export async function fetchPackageJsonFromGitHub(ref: GitHubRef): Promise<FetchPackageJsonResult> {
   let res: Response;
   try {
-    res = await fetch(rawPackageJsonUrl(ref), {
+    res = await fetch(rawFileUrl(ref), {
       headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(TIMEOUT_MS),
       cache: "no-store",
@@ -70,4 +71,33 @@ export async function fetchPackageJsonFromGitHub(ref: GitHubRef): Promise<FetchP
   } catch (error) {
     return { ok: false, error: isTimeout(error) ? "github-timeout" : "github-unavailable" };
   }
+}
+
+async function fetchRawText(ref: GitHubRef, file: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(rawFileUrl(ref, file), {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(5_000),
+      cache: "no-store",
+    });
+    if (!res.ok || Number(res.headers.get("content-length") ?? 0) > 64 * 1024) return undefined;
+    return await res.text();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Workspace globs from pnpm-workspace.yaml or lerna.json next to package.json.
+ * Both reads go through raw.githubusercontent.com, so they cost no API quota.
+ */
+export async function fetchExternalWorkspaces(ref: GitHubRef): Promise<string[] | undefined> {
+  const [pnpm, lerna] = await Promise.all([
+    fetchRawText(ref, "pnpm-workspace.yaml"),
+    fetchRawText(ref, "lerna.json"),
+  ]);
+  const pnpmGlobs = pnpm === undefined ? [] : parsePnpmWorkspaceYaml(pnpm);
+  if (pnpmGlobs.length) return pnpmGlobs;
+  const lernaGlobs = lerna === undefined ? undefined : parseLernaJson(lerna);
+  return lernaGlobs?.length ? lernaGlobs : undefined;
 }

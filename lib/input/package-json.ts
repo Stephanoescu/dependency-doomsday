@@ -13,6 +13,8 @@ import {
 
 export interface ParseOptions {
   includeDev?: boolean;
+  /** Globs from pnpm-workspace.yaml / lerna.json, used when package.json has no "workspaces". */
+  externalWorkspaces?: string[];
 }
 
 type SpecClass = { kind: "registry"; target?: string } | { kind: "skip"; reason: SkipReason };
@@ -104,7 +106,7 @@ export function parsePackageJson(text: string, options: ParseOptions = {}): Pars
   }
 
   const runtimeDeps = readDependencyMap(pkg, "dependencies");
-  const workspaces = readWorkspaces(pkg);
+  const workspaces = readWorkspaces(pkg) ?? options.externalWorkspaces;
   const monorepo: MonorepoInfo | undefined =
     workspaces && Object.keys(runtimeDeps).length < MONOREPO_DEPENDENCY_THRESHOLD
       ? { workspaces }

@@ -20,7 +20,7 @@ describe("workspaceDir", () => {
 describe("monorepoExampleUrl", () => {
   it("uses the real repo and branch when known", () => {
     expect(monorepoExampleUrl(["packages/*"], { owner: "babel", repo: "babel" })).toBe(
-      "https://github.com/babel/babel/tree/main/packages/",
+      "https://github.com/babel/babel/tree/HEAD/packages/",
     );
     expect(
       monorepoExampleUrl(["apps/*"], { owner: "acme", repo: "mono", ref: "develop" }),
@@ -29,7 +29,7 @@ describe("monorepoExampleUrl", () => {
 
   it("uses a placeholder repo for pasted package.json files", () => {
     expect(monorepoExampleUrl(["packages/*"])).toBe(
-      "https://github.com/your-org/your-repo/tree/main/packages/",
+      "https://github.com/your-org/your-repo/tree/HEAD/packages/",
     );
   });
 });

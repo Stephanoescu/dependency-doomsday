@@ -4,7 +4,7 @@ import {
   gitHubWebUrl,
   looksLikeOtherHostUrl,
   parseGitHubRef,
-  rawPackageJsonUrl,
+  rawFileUrl,
 } from "./github-url";
 
 describe("parseGitHubRef", () => {
@@ -41,6 +41,16 @@ describe("parseGitHubRef", () => {
       ref: "canary",
       path: "packages/next",
     });
+  });
+
+  it("accepts HEAD as the branch", () => {
+    expect(parseGitHubRef("https://github.com/babel/babel/tree/HEAD/packages/babel-core")).toEqual({
+      owner: "babel",
+      repo: "babel",
+      ref: "HEAD",
+      path: "packages/babel-core",
+    });
+    expect(parseGitHubRef("babel/babel/tree/HEAD/packages/babel-core")?.ref).toBe("HEAD");
   });
 
   it("parses /tree/<branch> without a path", () => {
@@ -104,11 +114,14 @@ describe("formatting", () => {
   });
 
   it("builds raw.githubusercontent.com URLs, defaulting to HEAD", () => {
-    expect(rawPackageJsonUrl({ owner: "a", repo: "b" })).toBe(
+    expect(rawFileUrl({ owner: "a", repo: "b" })).toBe(
       "https://raw.githubusercontent.com/a/b/HEAD/package.json",
     );
-    expect(rawPackageJsonUrl({ owner: "a", repo: "b", ref: "dev", path: "packages/x" })).toBe(
+    expect(rawFileUrl({ owner: "a", repo: "b", ref: "dev", path: "packages/x" })).toBe(
       "https://raw.githubusercontent.com/a/b/dev/packages/x/package.json",
+    );
+    expect(rawFileUrl({ owner: "a", repo: "b" }, "pnpm-workspace.yaml")).toBe(
+      "https://raw.githubusercontent.com/a/b/HEAD/pnpm-workspace.yaml",
     );
   });
 });
