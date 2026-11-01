@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type DragEvent } from "react";
-import { DependencyPreview } from "@/components/dependency-preview";
+import { AnalysisPreview } from "@/components/analysis-preview";
+import { AnalysisProgress, progressText } from "@/components/analysis-progress";
+import { GitHubQuotaNotice } from "@/components/github-quota-notice";
 import { ErrorIcon, Spinner, UploadIcon } from "@/components/icons";
 import { MonorepoHint } from "@/components/monorepo-hint";
 import { PrivacyNotice } from "@/components/privacy-notice";
+import { runAnalysis, type AnalysisOutcome } from "@/lib/analysis/client";
 import { fmt, getMessages, plural, type Messages } from "@/lib/i18n";
 import { resolveInput } from "@/lib/input/resolve-client";
-import { MAX_INPUT_BYTES, type ResolveResponse } from "@/lib/input/types";
+import { MAX_INPUT_BYTES, type ParseSuccess, type ResolveResponse } from "@/lib/input/types";
 
 const EXAMPLES = [
   { label: "expressjs/express", input: "https://github.com/expressjs/express" },
@@ -20,8 +23,15 @@ const EXAMPLES = [
 
 type Status =
   | { kind: "idle" }
-  | { kind: "loading" }
-  | { kind: "done"; result: ResolveResponse; includeDev: boolean };
+  | { kind: "reading" }
+  | {
+      kind: "analyzing";
+      parsed: ParseSuccess & { ref?: ResolveResponse["ref"] };
+      done: number;
+      total: number;
+      current?: string;
+    }
+  | { kind: "done"; parsed: ResolveResponse; includeDev: boolean; analysis?: AnalysisOutcome };
 
 function errorText(t: Messages, result: Extract<ResolveResponse, { ok: false }>, includeDev: boolean) {
   if (result.error === "no-dependencies" && !includeDev && !result.monorepo) {
@@ -49,7 +59,7 @@ export function ForecastForm() {
   const abortRef = useRef<AbortController | null>(null);
   const dragDepth = useRef(0);
 
-  const loading = status.kind === "loading";
+  const loading = status.kind === "reading" || status.kind === "analyzing";
 
   // Dropping a file outside the drop zone would otherwise navigate away from the page.
   useEffect(() => {
@@ -64,24 +74,38 @@ export function ForecastForm() {
 
   // Move focus to the result so keyboard and screen-reader users land on it.
   useEffect(() => {
-    if (status.kind === "done" && status.result.ok) resultHeadingRef.current?.focus();
+    if (status.kind === "done" && status.analysis?.ok) resultHeadingRef.current?.focus();
   }, [status]);
 
   async function run(input: string, dev = includeDev) {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    setStatus({ kind: "loading" });
+    const { signal } = controller;
+    setStatus({ kind: "reading" });
     try {
-      const result = await resolveInput(input, dev, controller.signal);
-      if (!controller.signal.aborted) setStatus({ kind: "done", result, includeDev: dev });
+      const parsed = await resolveInput(input, dev, signal);
+      if (signal.aborted) return;
+      if (!parsed.ok) return setStatus({ kind: "done", parsed, includeDev: dev });
+
+      setStatus({ kind: "analyzing", parsed, done: 0, total: parsed.packages.length });
+      const analysis = await runAnalysis(parsed.packages, {
+        signal,
+        onProgress: (done, total, name) => {
+          if (signal.aborted) return;
+          setStatus((s) =>
+            s.kind === "analyzing" ? { ...s, done, total, current: name ?? s.current } : s,
+          );
+        },
+      });
+      if (!signal.aborted) setStatus({ kind: "done", parsed, includeDev: dev, analysis });
     } catch {
       // Aborted by a newer request.
     }
   }
 
   function fail(error: "file-type" | "file-unreadable" | "too-large") {
-    setStatus({ kind: "done", result: { ok: false, error }, includeDev });
+    setStatus({ kind: "done", parsed: { ok: false, error }, includeDev });
   }
 
   async function loadFile(f: File) {
@@ -142,16 +166,23 @@ export function ForecastForm() {
     if (status.kind === "done" && text.trim()) void run(text, next);
   }
 
-  const result = status.kind === "done" ? status.result : null;
-  const resultIncludesDev = status.kind === "done" && status.includeDev;
-  const announcement = result
-    ? [
-        result.ok
-          ? plural(t.preview.ready, result.packages.length)
-          : errorText(t, result, resultIncludesDev),
-        result.monorepo ? t.monorepo.message : "",
-      ].join(" ")
-    : "";
+  const parsed = status.kind === "done" || status.kind === "analyzing" ? status.parsed : null;
+  const analysis = status.kind === "done" ? status.analysis : undefined;
+  const failure =
+    status.kind !== "done"
+      ? null
+      : !status.parsed.ok
+        ? errorText(t, status.parsed, status.includeDev)
+        : analysis && !analysis.ok
+          ? t.errors[analysis.error]
+          : null;
+  const announcement =
+    status.kind !== "done"
+      ? ""
+      : [
+          failure ?? (analysis?.ok ? plural(t.preview.analyzed, analysis.result.packages.length) : ""),
+          status.parsed.monorepo ? t.monorepo.message : "",
+        ].join(" ");
 
   return (
     <div className="space-y-8">
@@ -298,7 +329,11 @@ export function ForecastForm() {
             className="inline-flex w-full items-center justify-center gap-3 bg-alarm px-7 py-4 font-display text-lg text-void uppercase transition-[background-color,transform] hover:bg-[#ff6a61] active:translate-y-px disabled:cursor-wait disabled:opacity-80 sm:w-auto"
           >
             {loading && <Spinner className="size-5" />}
-            {loading ? t.input.submitting : t.input.submit}
+            {status.kind === "analyzing"
+              ? progressText(status.done, status.total)
+              : loading
+                ? t.input.submitting
+                : t.input.submit}
             {!loading && <span aria-hidden>→</span>}
           </button>
           <kbd className="hidden font-mono text-xs text-dim sm:inline">{t.input.shortcut}</kbd>
@@ -330,25 +365,41 @@ export function ForecastForm() {
         {announcement}
       </p>
 
-      {result && (
+      {parsed && (
         <div className="space-y-4">
-          {result.monorepo && (
+          {parsed.monorepo && (
             <MonorepoHint
-              monorepo={result.monorepo}
-              githubRef={result.ref}
+              monorepo={parsed.monorepo}
+              githubRef={parsed.ref}
               onUseExample={applyExampleUrl}
             />
           )}
-          {result.ok ? (
-            <DependencyPreview result={result} headingRef={resultHeadingRef} />
-          ) : (
+          {status.kind === "analyzing" && (
+            <AnalysisProgress done={status.done} total={status.total} current={status.current} />
+          )}
+          {failure && (
             <div className="animate-rise flex gap-3 border border-alarm/60 bg-alarm/10 p-4 text-sm leading-relaxed text-bone">
               <ErrorIcon className="mt-0.5 size-4 shrink-0 text-alarm" />
               <p>
                 <span className="sr-only">{t.input.errorLabel} </span>
-                {errorText(t, result, resultIncludesDev)}
+                {failure}
               </p>
             </div>
+          )}
+          {parsed.ok && analysis?.ok && (
+            <>
+              <GitHubQuotaNotice
+                quota={analysis.result.github}
+                skipped={
+                  analysis.result.packages.filter((p) => p.githubStatus === "rate-limited").length
+                }
+              />
+              <AnalysisPreview
+                parsed={parsed}
+                analysis={analysis.result}
+                headingRef={resultHeadingRef}
+              />
+            </>
           )}
         </div>
       )}

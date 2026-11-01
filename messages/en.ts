@@ -68,6 +68,7 @@ export const en = {
     "file-type": "That file isn't JSON. Drop your package.json.",
     "file-unreadable": "We couldn't read that file. Try pasting its contents instead.",
     network: "Network error. Check your connection and try again.",
+    "analysis-failed": "The analysis failed on our side. Try again in a moment.",
   },
 
   monorepo: {
@@ -78,16 +79,29 @@ export const en = {
     useExample: "Edit this URL",
   },
 
+  progress: {
+    reading: "Reading package.json…",
+    connecting: "Contacting npm and GitHub…",
+    checking: "Checking {done}/{total}…",
+    current: "Last checked: {name}",
+    label: "Analysis progress",
+  },
+
   preview: {
-    title: "Dependencies detected",
-    ready: {
-      one: "{count} package ready for analysis",
-      other: "{count} packages ready for analysis",
+    title: "Evidence collected",
+    analyzed: {
+      one: "{count} package analyzed",
+      other: "{count} packages analyzed",
     },
     project: "Project: {name}",
     truncated: {
       one: "{count} more was left out — a forecast covers up to {max} packages.",
       other: "{count} more were left out — a forecast covers up to {max} packages.",
+    },
+    noData: {
+      one: "{count} package has no data because a source failed. It will be left out of the score.",
+      other:
+        "{count} packages have no data because a source failed. They will be left out of the score.",
     },
     skipped: {
       one: "{count} skipped — not from the npm registry",
@@ -95,8 +109,42 @@ export const en = {
     },
     devTag: "dev",
     aliasOf: "alias {alias}",
-    pending:
-      "Forecast engine coming online. This preview confirms we read your dependencies correctly.",
+    pending: "Risk scoring arrives next. This is the raw evidence it will be computed from.",
+  },
+
+  facts: {
+    maintainers: { one: "{count} maintainer", other: "{count} maintainers" },
+    lastRelease: "released {time}",
+    downloads: "{count}/month",
+    pushed: "pushed {time}",
+    stars: "{count} stars",
+    issues: { one: "{count} open issue", other: "{count} open issues" },
+  },
+
+  tags: {
+    deprecated: "Deprecated",
+    archived: "Archived",
+    unpublished: "Unpublished",
+    noData: "No data",
+    notOnNpm: "Not on npm",
+    noRepo: "No repo linked",
+    notGithub: "Repo not on GitHub",
+    repoNotFound: "Repo not found",
+    githubLimit: "GitHub skipped (limit)",
+    githubError: "GitHub unavailable",
+  },
+
+  quota: {
+    lowTitle: "GitHub limit running low",
+    low: "No GitHub token is set, so we're on GitHub's public limit: {remaining} of {limit} requests left this hour. It resets at {reset}. Cached repos don't count against it.",
+    exhaustedTitle: "GitHub limit reached",
+    exhausted: {
+      one: "GitHub's hourly limit ran out, so {count} package was checked without GitHub activity. It resets at {reset}; try again after that for a complete forecast.",
+      other:
+        "GitHub's hourly limit ran out, so {count} packages were checked without GitHub activity. It resets at {reset}; try again after that for a complete forecast.",
+    },
+    tokenHint:
+      "Running Dependency Doomsday yourself? Add a free GITHUB_TOKEN to .env.local for 5,000 requests per hour.",
   },
 
   skipReasons: {
