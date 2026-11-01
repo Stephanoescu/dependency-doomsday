@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   // Keep the dev badge away from the input controls on small screens.
   devIndicators: { position: "top-right" },
+  // Share images read their fonts from disk at request time.
+  outputFileTracingIncludes: {
+    "/api/og": ["./assets/fonts/*.ttf"],
+  },
   turbopack: {
     rules: {
       "*.css": {
