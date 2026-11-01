@@ -88,12 +88,10 @@ export const en = {
   },
 
   preview: {
-    title: "Evidence collected",
     analyzed: {
       one: "{count} package analyzed",
       other: "{count} packages analyzed",
     },
-    project: "Project: {name}",
     truncated: {
       one: "{count} more was left out — a forecast covers up to {max} packages.",
       other: "{count} more were left out — a forecast covers up to {max} packages.",
@@ -109,7 +107,6 @@ export const en = {
     },
     devTag: "dev",
     aliasOf: "alias {alias}",
-    pending: "The full forecast — doomsday clock, treemap and share buttons — arrives next.",
   },
 
   facts: {
@@ -122,12 +119,8 @@ export const en = {
   },
 
   tags: {
-    deprecated: "Deprecated",
-    archived: "Archived",
-    unpublished: "Unpublished",
     noData: "No data",
     notOnNpm: "Not on npm",
-    noRepo: "No repo linked",
     notGithub: "Repo not on GitHub",
     repoNotFound: "Repo not found",
     githubLimit: "GitHub skipped (limit)",
@@ -205,7 +198,6 @@ export const en = {
     unknownScore: "?",
     replay: "Replay",
     newForecast: "New forecast",
-    notices: "Notes",
     allPackages: { one: "All packages ({count})", other: "All packages ({count})" },
   },
 
