@@ -160,6 +160,103 @@ export const en = {
     methodology: "Methodology v{version}",
   },
 
+  result: {
+    /** The worst finding, read first. See headline() in lib/narrative.ts for the priorities. */
+    headline: {
+      critical:
+        "Your most critical dependency (**{name}**, {downloads} downloads/month) is maintained by **1 person**.",
+      deprecated: "**{name}**, one of your dependencies, is **deprecated**.",
+      archived: "**{name}**, one of your dependencies, lives in an **archived** repo.",
+      unpublished: "**{name}**, one of your dependencies, was **unpublished** from npm.",
+      "stale-release": "**{name}** hasn't had a release in **{age}**.",
+      "stale-push": "Nobody has pushed to **{name}**'s repo in **{age}**.",
+      "single-maintainer": "**{name}** ({downloads} downloads/month) is maintained by **1 person**.",
+      "no-repo": "**{name}** has no public source repository.",
+      watch: {
+        one: "Nothing is on fire, but **{count} dependency** needs watching.",
+        other: "Nothing is on fire, but **{count} dependencies** need watching.",
+      },
+      allClear: {
+        one: "**Doomsday postponed.** Your only dependency is low risk.",
+        other: "**Doomsday postponed.** All {count} dependencies are low risk.",
+      },
+      insufficient:
+        "We couldn't get data for **{unscored} of {total}** packages, so a score would be misleading.",
+    },
+    sentences: {
+      levels: {
+        one: "{count} dependency checked: {high} high risk, {mid} to watch, {low} low risk.",
+        other: "{count} dependencies checked: {high} high risk, {mid} to watch, {low} low risk.",
+      },
+      singleMaintainer: {
+        one: "1 hangs on a single maintainer.",
+        other: "{count} hang on a single maintainer.",
+      },
+      singleMaintainerCritical: {
+        one: "1 hangs on a single maintainer, and it's critical: over 1M downloads a month.",
+        other: "{count} hang on a single maintainer — {critical} of them critical, with over 1M downloads a month.",
+      },
+      oldest: "The oldest release is {age} old ({name}).",
+      insufficient:
+        "Only {scored} of {total} packages could be checked — npm may be having trouble. Try again in a minute.",
+    },
+    allClearNote: "Every dependency has recent releases, more than one maintainer or a clean bill of health.",
+    scoreSr: "Doomsday score: {score} out of 100. {minutes}.",
+    unknownScore: "?",
+    replay: "Replay",
+    newForecast: "New forecast",
+    notices: "Notes",
+    allPackages: { one: "All packages ({count})", other: "All packages ({count})" },
+  },
+
+  treemap: {
+    title: "Every dependency at a glance",
+    hint: "Size is the package's weight in your score. Tap a tile to see why.",
+    label: "Dependencies by risk",
+    more: "+{count} more",
+    moreLabel: { one: "{count} more package — see the full list", other: "{count} more packages — see the full list" },
+    tile: "{name}: risk {risk}, {level}",
+    tileCritical: "{name}: risk {risk}, {level}, critical",
+    tileNoData: "{name}: no data",
+    legendCritical: "Critical",
+    legendNoData: "No data",
+  },
+
+  detail: {
+    close: "Close",
+    risk: "Risk",
+    why: "Why",
+    noRules: "No risk rules apply. Healthy by every measure we check.",
+    noData: "npm didn't answer for this package, so it isn't scored.",
+    evidence: "Evidence",
+    maintainers: "Maintainers",
+    npm: "npm page",
+    repo: "Repository",
+    support: "Support",
+  },
+
+  heroes: {
+    title: "Invisible heroes",
+    intro:
+      "These packages hold your project up, often on someone's free time. A thank-you, a fix or a sponsorship goes a long way.",
+    maintainedBy: "Maintained by",
+    andMore: "+{count} more",
+    support: "Support",
+    supportSr: "Support {name}",
+    profile: "npm profile",
+    profileSr: "{user} on npm",
+  },
+
+  share: {
+    title: "Share your forecast",
+    copyLink: "Copy link",
+    linkedin: "LinkedIn",
+    x: "X",
+    image: "Download image",
+    badge: "Copy badge",
+    soon: "Sharing arrives in the next update.",
+  },
+
   /** The "why" behind a package's risk. {age} is a duration like "4 years". */
   rules: {
     deprecated: "Deprecated on npm",
