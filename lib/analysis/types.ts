@@ -1,4 +1,5 @@
 import type { Dependency } from "@/lib/input/types";
+import type { Forecast, ScoredPackage } from "@/lib/risk";
 
 /** The only npm registry fields we keep (and cache). Emails are never stored. */
 export interface NpmInfo {
@@ -13,6 +14,8 @@ export interface NpmInfo {
   /** Most recent publish of any version (ISO date). */
   lastPublishAt: string | null;
   createdAt: string | null;
+  /** Runtime dependencies declared by the latest version; null when it can't be read. */
+  dependencyCount: number | null;
   /** Normalized https URL of the linked repository, or null when none is linked. */
   repositoryUrl: string | null;
   /** Set when the repository is on GitHub. */
@@ -62,7 +65,9 @@ export interface GitHubQuota {
 }
 
 export interface AnalysisResult {
-  packages: PackageData[];
+  /** Raw evidence plus the risk computed from it (with the rules that fired). */
+  packages: ScoredPackage[];
+  forecast: Forecast;
   github: GitHubQuota;
   generatedAt: string;
 }

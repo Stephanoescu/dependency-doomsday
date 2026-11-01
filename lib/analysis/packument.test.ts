@@ -32,6 +32,7 @@ describe("extractNpmInfo", () => {
       maintainers: ["stevemao", "westlac"],
       lastPublishAt: "2018-04-09T00:00:00.000Z",
       createdAt: "2014-03-14T00:00:00.000Z",
+      dependencyCount: 0,
       repositoryUrl: "https://github.com/stevemao/left-pad",
       github: { owner: "stevemao", repo: "left-pad" },
     });
@@ -70,6 +71,26 @@ describe("extractNpmInfo", () => {
       versions: { "1.0.0": { repository: "github:a/b" } },
     };
     expect(extractNpmInfo("x", doc).github).toEqual({ owner: "a", repo: "b" });
+  });
+
+  it("counts the latest version's runtime dependencies only", () => {
+    const doc = {
+      "dist-tags": { latest: "2.0.0" },
+      versions: {
+        "1.0.0": { dependencies: { a: "1", b: "1", c: "1" } },
+        "2.0.0": { dependencies: { a: "^2" }, devDependencies: { vitest: "1" }, peerDependencies: { react: "*" } },
+      },
+    };
+    expect(extractNpmInfo("x", doc).dependencyCount).toBe(1);
+  });
+
+  it("reports zero dependencies when the latest manifest declares none", () => {
+    const doc = { "dist-tags": { latest: "1.0.0" }, versions: { "1.0.0": {} } };
+    expect(extractNpmInfo("x", doc).dependencyCount).toBe(0);
+  });
+
+  it("leaves the dependency count unknown without a latest manifest", () => {
+    expect(extractNpmInfo("x", { versions: { "1.0.0": {} } }).dependencyCount).toBeNull();
   });
 
   it("detects unpublished packages", () => {

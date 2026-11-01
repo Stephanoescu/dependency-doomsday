@@ -48,6 +48,12 @@ export function extractNpmInfo(name: string, doc: unknown): NpmInfo {
     if (t > lastPublish) lastPublish = t;
   }
 
+  const dependencyCount = latest
+    ? isObject(latest.dependencies)
+      ? Object.keys(latest.dependencies).length
+      : 0
+    : null;
+
   const repository = parseRepositoryField(d.repository ?? latest?.repository);
 
   return {
@@ -58,6 +64,7 @@ export function extractNpmInfo(name: string, doc: unknown): NpmInfo {
     maintainers,
     lastPublishAt: Number.isFinite(lastPublish) ? new Date(lastPublish).toISOString() : null,
     createdAt: isoOrNull(time.created),
+    dependencyCount,
     repositoryUrl: repository.url,
     github: repository.github,
   };
