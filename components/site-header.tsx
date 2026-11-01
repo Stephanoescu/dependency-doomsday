@@ -16,6 +16,14 @@ export function SiteHeader() {
         </span>
         {t.brand.name}
       </Link>
+      <nav>
+        <Link
+          href="/methodology"
+          className="font-mono text-xs tracking-[0.15em] text-fog uppercase underline-offset-4 hover:text-bone hover:underline"
+        >
+          {t.nav.methodology}
+        </Link>
+      </nav>
     </header>
   );
 }

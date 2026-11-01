@@ -19,7 +19,7 @@ const jetbrains = JetBrains_Mono({
 const t = getMessages();
 
 export const metadata: Metadata = {
-  title: t.meta.title,
+  title: { default: t.meta.title, template: `%s — ${t.brand.name}` },
   description: t.meta.description,
   applicationName: t.brand.name,
 };
