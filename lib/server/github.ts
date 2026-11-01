@@ -1,19 +1,176 @@
+import type { GitHubQuota, GitHubRepoInfo, GitHubStatus } from "@/lib/analysis/types";
 import { rawFileUrl } from "@/lib/input/github-url";
 import { MAX_INPUT_BYTES, type GitHubRef, type InputErrorCode } from "@/lib/input/types";
 import { parseLernaJson, parsePnpmWorkspaceYaml } from "@/lib/input/workspaces";
+import { getJson, USER_AGENT } from "./http";
 
+const API = "https://api.github.com";
 const TIMEOUT_MS = 8_000;
-const USER_AGENT = "dependency-doomsday";
+
+// Set when GitHub answers 401: the token is wrong, so fall back to anonymous requests.
+let tokenRejected = false;
+
+function token(): string | undefined {
+  return tokenRejected ? undefined : process.env.GITHUB_TOKEN?.trim() || undefined;
+}
 
 /** Headers for api.github.com. GITHUB_TOKEN is optional and raises the limit from 60 to 5,000 req/h. */
 export function githubApiHeaders(): HeadersInit {
-  const token = process.env.GITHUB_TOKEN?.trim();
+  const t = token();
   return {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": USER_AGENT,
-    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(t && { Authorization: `Bearer ${t}` }),
   };
+}
+
+function rejectToken() {
+  if (!tokenRejected) {
+    tokenRejected = true;
+    console.warn("[github] GITHUB_TOKEN was rejected (401). Falling back to unauthenticated requests.");
+  }
+}
+
+function num(value: string | null | undefined): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Tracks the hourly API quota during one analysis. Each request reserves a
+ * unit up front (8 can be in flight), and response headers keep the count honest.
+ */
+export class GitHubBudget {
+  limit: number | null = null;
+  remaining: number | null = null;
+  resetAt: number | null = null; // epoch seconds
+  exhausted = false;
+
+  get authenticated(): boolean {
+    return token() !== undefined;
+  }
+
+  /** Reserves one request; false when the hourly quota is used up. */
+  reserve(): boolean {
+    if (this.exhausted) return false;
+    if (this.remaining !== null) {
+      if (this.remaining <= 0) {
+        this.exhausted = true;
+        return false;
+      }
+      this.remaining--;
+    }
+    return true;
+  }
+
+  update(headers: Headers | undefined) {
+    if (!headers) return;
+    const limit = num(headers.get("x-ratelimit-limit"));
+    const remaining = num(headers.get("x-ratelimit-remaining"));
+    const reset = num(headers.get("x-ratelimit-reset"));
+    if (limit !== null) this.limit = limit;
+    if (remaining === null) return;
+    // A later reset time means a new hourly window: trust the header.
+    // Otherwise keep the lower count, since responses can arrive out of order.
+    if (reset !== null && (this.resetAt === null || reset > this.resetAt)) {
+      this.resetAt = reset;
+      this.remaining = remaining;
+    } else {
+      this.remaining = this.remaining === null ? remaining : Math.min(this.remaining, remaining);
+    }
+  }
+
+  markExhausted() {
+    this.exhausted = true;
+    this.remaining = 0;
+  }
+
+  snapshot(): GitHubQuota {
+    return {
+      authenticated: this.authenticated,
+      limit: this.limit,
+      remaining: this.remaining,
+      resetAt: this.resetAt === null ? null : new Date(this.resetAt * 1_000).toISOString(),
+      exhausted: this.exhausted,
+    };
+  }
+}
+
+/** Reads the current quota. GET /rate_limit does not count against the limit. */
+export async function createGitHubBudget(signal?: AbortSignal): Promise<GitHubBudget> {
+  const budget = new GitHubBudget();
+  let result = await getJson(`${API}/rate_limit`, {
+    headers: githubApiHeaders(),
+    timeoutMs: 4_000,
+    signal,
+    retries: 0,
+  });
+  if (!result.ok && result.status === 401 && token()) {
+    rejectToken();
+    result = await getJson(`${API}/rate_limit`, { headers: githubApiHeaders(), timeoutMs: 4_000, signal, retries: 0 });
+  }
+  if (result.ok) {
+    const core = (result.json as { resources?: { core?: Record<string, unknown> } })?.resources?.core;
+    budget.limit = typeof core?.limit === "number" ? core.limit : null;
+    budget.remaining = typeof core?.remaining === "number" ? core.remaining : null;
+    budget.resetAt = typeof core?.reset === "number" ? core.reset : null;
+  }
+  return budget;
+}
+
+export type RepoLookup = { status: GitHubStatus; info: GitHubRepoInfo | null };
+
+function isRateLimited(status: number | undefined, headers: Headers | undefined, json: unknown) {
+  if (status === 429) return true;
+  if (status !== 403) return false;
+  if (headers?.get("x-ratelimit-remaining") === "0") return true;
+  const message = (json as { message?: unknown })?.message;
+  return typeof message === "string" && /rate limit/i.test(message);
+}
+
+function toRepoInfo(json: unknown): GitHubRepoInfo {
+  const r = (json ?? {}) as Record<string, unknown>;
+  const owner = (r.owner ?? {}) as Record<string, unknown>;
+  return {
+    fullName: typeof r.full_name === "string" ? r.full_name : "",
+    pushedAt: typeof r.pushed_at === "string" ? r.pushed_at : null,
+    archived: r.archived === true,
+    openIssues: typeof r.open_issues_count === "number" ? r.open_issues_count : 0,
+    stars: typeof r.stargazers_count === "number" ? r.stargazers_count : 0,
+    ownerType: typeof owner.type === "string" ? owner.type : "User",
+  };
+}
+
+/** GET /repos/{owner}/{repo}. Renamed repos are followed (GitHub answers 301). */
+export async function fetchRepo(
+  owner: string,
+  repo: string,
+  budget: GitHubBudget,
+  signal?: AbortSignal,
+): Promise<RepoLookup> {
+  if (!budget.reserve()) return { status: "rate-limited", info: null };
+
+  const url = `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+  let result = await getJson(url, { headers: githubApiHeaders(), timeoutMs: TIMEOUT_MS, signal });
+  if (!result.ok && result.status === 401 && token()) {
+    rejectToken();
+    result = await getJson(url, { headers: githubApiHeaders(), timeoutMs: TIMEOUT_MS, signal });
+  }
+  budget.update(result.headers);
+
+  if (result.ok) return { status: "ok", info: toRepoInfo(result.json) };
+  if (result.reason === "http") {
+    if (result.status === 404 || result.status === 451) return { status: "not-found", info: null };
+    if (isRateLimited(result.status, result.headers, result.json)) {
+      budget.markExhausted();
+      return { status: "rate-limited", info: null };
+    }
+  }
+  if (result.reason !== "aborted") {
+    console.warn(`[github] ${owner}/${repo}: ${result.reason}${result.status ? ` ${result.status}` : ""}`);
+  }
+  return { status: "error", info: null };
 }
 
 function isTimeout(error: unknown): boolean {
@@ -22,16 +179,12 @@ function isTimeout(error: unknown): boolean {
 
 /** true / false when GitHub answered clearly, undefined when it couldn't tell (rate limit, outage). */
 async function repoExists({ owner, repo }: GitHubRef): Promise<boolean | undefined> {
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
-      { headers: githubApiHeaders(), signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" },
-    );
-    if (res.ok) return true;
-    if (res.status === 404) return false;
-  } catch {
-    // fall through
-  }
+  const result = await getJson(
+    `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+    { headers: githubApiHeaders(), timeoutMs: TIMEOUT_MS, retries: 0 },
+  );
+  if (result.ok) return true;
+  if (result.status === 404) return false;
   return undefined;
 }
 
