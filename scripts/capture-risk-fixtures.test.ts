@@ -13,8 +13,13 @@ export const FIXTURE_PACKAGES = ["request", "left-pad", "react", "express", "lod
 describe.runIf(import.meta.env.MODE === "capture")("capture risk fixtures", () => {
   it("fetches live data", { timeout: 60_000 }, async () => {
     const result = await analyzePackages(FIXTURE_PACKAGES.map((name) => ({ name, field: "dependencies" })));
-    const packages = result.packages.map(({ risk: _risk, ...raw }) => raw);
-    for (const p of packages) {
+    // Keep the raw evidence only; the sanity test does the scoring.
+    const packages = result.packages.map((pkg) => {
+      const raw: Partial<typeof pkg> = { ...pkg };
+      delete raw.risk;
+      return raw;
+    });
+    for (const p of result.packages) {
       expect(p.npmStatus, p.name).toBe("ok");
       expect(p.githubStatus, p.name).toBe("ok");
     }
