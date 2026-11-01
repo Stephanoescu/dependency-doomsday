@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "fixtures:capture": "vitest run --mode capture scripts/capture-risk-fixtures.test.ts"
+    "fixtures:capture": "vitest run --mode capture scripts/capture-risk-fixtures.test.ts",
+    "check:fit": "node scripts/check-fit.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.40.0",
@@ -28,6 +29,7 @@
     "@types/validate-npm-package-name": "^4.0.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "playwright-core": "^1.64.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.5"
