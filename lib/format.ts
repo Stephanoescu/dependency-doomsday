@@ -24,6 +24,12 @@ export function formatRelative(iso: string, now: number = Date.now(), locale: Lo
   return rtf.format(0, "minute");
 }
 
+/** Whole months as a duration: 20 -> "20 months", 50 -> "4 years". Years from 24 months on. */
+export function formatMonths(months: number, locale: Locale = defaultLocale): string {
+  const [value, unit] = months >= 24 ? [Math.floor(months / 12), "year"] : [Math.max(0, Math.floor(months)), "month"];
+  return new Intl.NumberFormat(locale, { style: "unit", unit, unitDisplay: "long" }).format(value);
+}
+
 /** "7:19 PM" in the reader's time zone. */
 export function formatClockTime(iso: string, locale: Locale = defaultLocale): string {
   return new Intl.DateTimeFormat(locale, { timeStyle: "short" }).format(new Date(iso));

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCompact, formatRelative } from "./format";
+import { formatCompact, formatMonths, formatRelative } from "./format";
 
 const NOW = Date.parse("2026-11-01T12:00:00Z");
 
@@ -19,5 +19,17 @@ describe("formatRelative", () => {
     expect(formatRelative("2026-10-31T12:00:00Z", NOW)).toBe("yesterday");
     expect(formatRelative("2026-11-01T12:25:00Z", NOW)).toBe("in 25 minutes");
     expect(formatRelative("2026-11-01T12:00:10Z", NOW)).toBe("this minute");
+  });
+});
+
+describe("formatMonths", () => {
+  it("uses months below two years and whole years from there", () => {
+    expect([1, 20, 23, 24, 50].map((m) => formatMonths(m))).toEqual([
+      "1 month",
+      "20 months",
+      "23 months",
+      "2 years",
+      "4 years",
+    ]);
   });
 });

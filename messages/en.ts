@@ -99,9 +99,9 @@ export const en = {
       other: "{count} more were left out — a forecast covers up to {max} packages.",
     },
     noData: {
-      one: "{count} package has no data because a source failed. It will be left out of the score.",
+      one: "{count} package has no npm data because a source failed. It's left out of the score.",
       other:
-        "{count} packages have no data because a source failed. They will be left out of the score.",
+        "{count} packages have no npm data because a source failed. They're left out of the score.",
     },
     skipped: {
       one: "{count} skipped — not from the npm registry",
@@ -109,7 +109,7 @@ export const en = {
     },
     devTag: "dev",
     aliasOf: "alias {alias}",
-    pending: "Risk scoring arrives next. This is the raw evidence it will be computed from.",
+    pending: "The full forecast — doomsday clock, treemap and share buttons — arrives next.",
   },
 
   facts: {
@@ -132,6 +132,49 @@ export const en = {
     repoNotFound: "Repo not found",
     githubLimit: "GitHub skipped (limit)",
     githubError: "GitHub unavailable",
+    npmDataOnly: "npm data only",
+    possiblyFinished: "Possibly finished, not abandoned",
+    critical: "Critical",
+  },
+
+  levels: {
+    low: "Low risk",
+    mid: "Watch",
+    high: "High risk",
+  },
+
+  forecast: {
+    scoreLabel: "Doomsday score",
+    outOf: "/100",
+    minutes: { one: "{count} minute to midnight", other: "{count} minutes to midnight" },
+    noScore: "Not enough data to score this project.",
+    risk: "Risk {risk}",
+    npmDataOnly: {
+      one: "{count} package scored without GitHub data.",
+      other: "{count} packages scored without GitHub data.",
+    },
+    critical: {
+      one: "{count} critical package: one maintainer, over 1M downloads a month.",
+      other: "{count} critical packages: one maintainer each, over 1M downloads a month.",
+    },
+    methodology: "Methodology v{version}",
+  },
+
+  /** The "why" behind a package's risk. {age} is a duration like "4 years". */
+  rules: {
+    deprecated: "Deprecated on npm",
+    unpublished: "Unpublished from npm",
+    archived: "Repo archived on GitHub",
+    "single-maintainer": "Single maintainer",
+    "stale-release": "Last release {age} ago",
+    "stale-push": "No GitHub push in {age}",
+    "no-repo": "No repository linked",
+    halved: "halved from {points}: {reasons}",
+    halvedBy: {
+      "possibly-finished": "possibly finished",
+      "recent-push": "repo still active",
+    },
+    capped: "Capped at {max}",
   },
 
   quota: {
@@ -157,8 +200,136 @@ export const en = {
     "invalid-spec": "invalid version",
   },
 
+  nav: {
+    methodology: "Methodology",
+  },
+
   footer: {
     tagline: "Free. No sign-up. Rules, not AI — every score is explainable.",
     data: "Data from the npm registry and GitHub.",
+    methodology: "How scores are calculated",
+  },
+
+  /**
+   * /methodology. Numbers in {braces} are filled in from RULES in lib/risk.ts,
+   * so the page can't drift from the code.
+   */
+  methodology: {
+    metaTitle: "Methodology",
+    metaDescription:
+      "How Dependency Doomsday scores dependency risk with fixed, public rules — no AI, no hidden weights.",
+    eyebrow: "How the forecast works",
+    title: "Rules, not magic.",
+    version: "Methodology v{version}",
+    intro:
+      "Every forecast comes from a handful of fixed rules applied to public data from npm and GitHub. No AI and no secret weights: the same dependencies get the same score on the same day, and every point traces back to a fact you can check yourself.",
+
+    sources: {
+      title: "What we look at",
+      items: [
+        "**npm registry**: maintainers, release dates, deprecation, the linked repository and how many dependencies the latest version has.",
+        "**npm downloads**: downloads in the last month.",
+        "**GitHub**: last push, whether the repo is archived, and open issues.",
+      ],
+      privacy: "Only package names are sent to these services. Your code never is.",
+    },
+
+    package: {
+      title: "Risk of each package",
+      intro:
+        "Every package starts at 0. Each rule that applies adds points, and the total is capped at {max}.",
+      ruleHeader: "Rule",
+      pointsHeader: "Points",
+      terminalPoints: "= {max}",
+      rows: {
+        terminal: {
+          rule: "Deprecated or unpublished on npm, or the GitHub repo is archived",
+          why: "The authors have said it's over. No more fixes, security fixes included.",
+        },
+        singleMaintainer: {
+          rule: "Only one maintainer on npm",
+          why: "One burnout, lost laptop or hijacked account away from trouble. That's how xz happened.",
+        },
+        releaseOld: {
+          rule: "Last release more than 36 months ago",
+          why: "Bugs and vulnerabilities found since then have no published fix.",
+        },
+        releaseStale: {
+          rule: "Otherwise, last release more than 18 months ago",
+          why: "Slowing down. Worth a look, not yet a fire.",
+        },
+        push: {
+          rule: "No push to the GitHub repo in more than 24 months",
+          why: "Nobody is touching the code, not even unreleased changes.",
+        },
+        noRepo: {
+          rule: "No source repository linked",
+          why: "Hard to inspect, fork or fix if the maintainer disappears.",
+        },
+      },
+    },
+
+    discounts: {
+      title: "Quiet is not always dead",
+      intro:
+        "Some packages are old because they're done. The release-age penalty is **halved** when either of these is true — once, even if both are:",
+      finished:
+        "**Possibly finished, not abandoned.** It has no dependencies of its own, fewer than {issues} open issues on GitHub, and it isn't deprecated or archived. A small utility with nothing left to fix doesn't need new releases. These packages are tagged so you can see why.",
+      alive:
+        "**Still alive.** The repo had a push in the last {months} months, even if nothing new was published.",
+      example:
+        "Example: last released 4 years ago, no dependencies, 3 open issues → +{halved} instead of +{full}.",
+    },
+
+    colors: {
+      title: "Colors",
+      low: "0–29",
+      mid: "30–59",
+      high: "60–100",
+    },
+
+    critical: {
+      title: "Critical packages",
+      body: "A package is **critical** when it has a single maintainer and more than {downloads} downloads a month: a big slice of the internet rests on one person. Critical packages count double in the project score.",
+    },
+
+    project: {
+      title: "Your project's score",
+      body: "Your score is **100 minus the average risk** of your dependencies, from 0 (midnight) to 100 (all clear). The average is weighted by popularity, so a package millions of projects rely on weighs more than an obscure one.",
+      formula: [
+        "score  = 100 − Σ(risk × weight) ÷ Σ(weight)",
+        "weight = 1 + log10(monthly downloads + 1)",
+        "         × {critical} if critical",
+      ],
+      weights:
+        "That's a weight of about 1 for a package nobody downloads, 5 for 10,000 downloads a month and 8 for 10 million.",
+    },
+
+    clock: {
+      title: "The doomsday clock",
+      body: "Minutes to midnight = score ÷ 10, rounded, and never less than 1. A score of 82 puts you at 8 minutes to midnight; anything under 15 is 1 minute.",
+    },
+
+    missing: {
+      title: "When data is missing",
+      body: "If npm doesn't answer for a package, it's marked **no data** and left out of the score. If only GitHub is missing — no repo linked, a repo on another host, or GitHub's rate limit — the package is still scored from npm alone and tagged **npm data only**. The push rule and the \"possibly finished\" discount are skipped, and the forecast says how many packages were scored this way.",
+    },
+
+    limits: {
+      title: "What this doesn't tell you",
+      items: [
+        "It measures **maintenance risk**, not code quality or known vulnerabilities. Use npm audit or a vulnerability scanner for those.",
+        "Only your **direct** dependencies are scored, not the packages they pull in.",
+        "npm only shows who can publish, not who does the work, so the maintainer count is an approximation.",
+        "A risky score is a reason to look closer — and maybe to sponsor someone — not a verdict on people who maintain software for free.",
+      ],
+    },
+
+    versioning: {
+      title: "Versioning",
+      body: "Any change to a rule or a number becomes a new methodology version, and every forecast shows the version it was computed with. You're reading **Methodology v{version}**.",
+    },
+
+    cta: "Get your forecast",
   },
 };

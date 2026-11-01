@@ -8,6 +8,7 @@ import { ErrorIcon, Spinner, UploadIcon } from "@/components/icons";
 import { MonorepoHint } from "@/components/monorepo-hint";
 import { PrivacyNotice } from "@/components/privacy-notice";
 import { runAnalysis, type AnalysisOutcome } from "@/lib/analysis/client";
+import type { AnalysisResult } from "@/lib/analysis/types";
 import { fmt, getMessages, plural, type Messages } from "@/lib/i18n";
 import { resolveInput } from "@/lib/input/resolve-client";
 import { MAX_INPUT_BYTES, type ParseSuccess, type ResolveResponse } from "@/lib/input/types";
@@ -38,6 +39,14 @@ function errorText(t: Messages, result: Extract<ResolveResponse, { ok: false }>,
     return t.errors["no-dependencies-try-dev"];
   }
   return fmt(t.errors[result.error], { location: result.location ?? "package.json" });
+}
+
+/** "Doomsday score 82/100. 8 minutes to midnight. 28 packages analyzed." */
+function resultAnnouncement(t: Messages, result: AnalysisResult) {
+  const { score, minutesToMidnight } = result.forecast;
+  const analyzed = plural(t.preview.analyzed, result.packages.length);
+  if (score === null || minutesToMidnight === null) return `${t.forecast.noScore} ${analyzed}.`;
+  return `${t.forecast.scoreLabel} ${score}${t.forecast.outOf}. ${plural(t.forecast.minutes, minutesToMidnight)}. ${analyzed}.`;
 }
 
 function formatBytes(bytes: number) {
@@ -180,7 +189,7 @@ export function ForecastForm() {
     status.kind !== "done"
       ? ""
       : [
-          failure ?? (analysis?.ok ? plural(t.preview.analyzed, analysis.result.packages.length) : ""),
+          failure ?? (analysis?.ok ? resultAnnouncement(t, analysis.result) : ""),
           status.parsed.monorepo ? t.monorepo.message : "",
         ].join(" ");
 
