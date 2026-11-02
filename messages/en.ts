@@ -11,6 +11,7 @@ export const en = {
 
   brand: {
     name: "Dependency Doomsday",
+    short: "Doomsday",
     home: "Dependency Doomsday — home",
   },
 
@@ -19,6 +20,12 @@ export const en = {
     titleBefore: "How close is your project to",
     titleAccent: "midnight?",
     lede: "In 2016, one developer unpublished **left-pad** — 11 lines of code — and builds broke across the internet. In 2024, the exhausted lone maintainer of **xz** handed commit access to a stranger who planted a backdoor that nearly reached every Linux server. Which of your dependencies is next?",
+    preview: {
+      title: "What a forecast looks like",
+      body: "A real forecast for {label}, captured {date}. Open it to see the live version.",
+      cta: "Open the live forecast",
+      srSummary: "Sample forecast for {label}: doomsday score {score} out of 100, {minutes}. Open the live forecast.",
+    },
   },
 
   input: {
@@ -40,7 +47,7 @@ export const en = {
 
   privacy: {
     title: "Your code never leaves your machine.",
-    body: "We only read **package names**. Files you paste or drop are parsed right here in your browser. For GitHub repos we read the public package.json and nothing else. No sign-up, and your report is never stored.",
+    body: "We only read **package names**. Files you paste or drop are parsed right here in your browser. For GitHub repos we read the public package.json and nothing else. No sign-up, and your report is never stored. We count anonymous visits with Vercel Web Analytics — no cookies, and package lists are never sent to it.",
   },
 
   errors: {
@@ -348,6 +355,10 @@ export const en = {
     genericAccent: "midnight?",
     genericBody: "Free doomsday forecast for your npm dependencies.",
     pending: "Forecast for {label} — open the link to see the score.",
+    homeAlt: "Dependency Doomsday: how close is your project to midnight?",
+    homeBadge: "Free · No sign-up",
+    homeBody: "Paste your package.json and get a doomsday forecast for your npm dependencies.",
+    homeChips: ["Abandoned", "Single maintainer", "Critical"],
     /** Used when a pasted package.json has no name. */
     thisProject: "This project",
     /** Third person, for images seen by people who don't own the project. */
@@ -412,14 +423,70 @@ export const en = {
     "invalid-spec": "invalid version",
   },
 
+  notFound: {
+    metaTitle: "Page not found",
+    title: "This page hit midnight.",
+    body: "The link may be broken, or the page never existed. Your dependencies, hopefully, are in better shape.",
+    home: "Get a forecast",
+    ranking: "See the ranking",
+    methodology: "How it works",
+  },
+
+  errorPage: {
+    eyebrow: "Something broke",
+    title: "One minute to midnight.",
+    body: "Something went wrong on our side. Try again — and if it keeps happening, the data sources may be having a bad day.",
+    retry: "Try again",
+    home: "Back to the start",
+  },
+
   nav: {
+    label: "Main",
+    ranking: "Ranking",
     methodology: "Methodology",
+  },
+
+  ranking: {
+    metaTitle: "Who holds up the internet?",
+    metaDescription:
+      "Ten popular open-source projects and the single npm maintainers their dependencies quietly rely on. A measure of dependency fragility, not project quality.",
+    eyebrow: "The ranking",
+    title: "Who holds up the internet?",
+    intro:
+      "Ten popular open-source projects, run through the same rules as your forecast. Behind almost every one of them are packages kept alive by a single person.",
+    noteTitle: "What this is — and isn't",
+    note: "This measures how fragile a project's **dependencies** are, not the quality of the project or the people who build it. A low score usually means the project relies on a few people maintaining critical packages for free. Projects were picked for variety — frameworks, build tools, linters, test runners and libraries — not for how they score.",
+    heroesTitle: "The people holding it up",
+    heroesIntro:
+      "Single npm maintainers whose packages several of these projects depend on. If you use any of these projects, you depend on them too.",
+    reliedOn: { one: "{count} project relies on them", other: "{count} projects rely on them" },
+    morePackages: { one: "+{count} more package", other: "+{count} more packages" },
+    support: "Support",
+    profile: "npm profile",
+    projectsTitle: "Closest to midnight first",
+    category: {
+      framework: "Framework",
+      build: "Build tool",
+      tooling: "Tooling",
+      testing: "Testing",
+      library: "Library",
+    },
+    rank: "#{rank}",
+    dependencies: { one: "{count} dependency", other: "{count} dependencies" },
+    critical: { one: "{count} critical", other: "{count} critical" },
+    viewReport: "Full forecast",
+    updated: "Updated {time} · Methodology v{version}",
+    failed: "Couldn't refresh this time: {projects}.",
+    computing: "The ranking is being refreshed. Check back in a minute.",
+    cta: "Check your own project",
   },
 
   footer: {
     tagline: "Free. No sign-up. Rules, not AI — every score is explainable.",
     data: "Data from the npm registry and GitHub.",
     methodology: "How scores are calculated",
+    ranking: "Who holds up the internet?",
+    source: "Source on GitHub (MIT)",
   },
 
   /**
