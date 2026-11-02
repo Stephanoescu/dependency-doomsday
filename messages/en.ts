@@ -359,6 +359,10 @@ export const en = {
     homeBadge: "Free · No sign-up",
     homeBody: "Paste your package.json and get a doomsday forecast for your npm dependencies.",
     homeChips: ["Abandoned", "Single maintainer", "Critical"],
+    rankingAlt: "Who holds up the internet? The single npm maintainers ten popular open-source projects rely on.",
+    rankingBadge: "10 open-source projects",
+    rankingBody: "The single npm maintainers that ten popular open-source projects quietly rely on.",
+    rankingHeroes: "Holding it up",
     /** Used when a pasted package.json has no name. */
     thisProject: "This project",
     /** Third person, for images seen by people who don't own the project. */

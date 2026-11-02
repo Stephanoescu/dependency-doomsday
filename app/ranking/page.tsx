@@ -12,6 +12,7 @@ import { writeFinding } from "@/lib/narrative";
 import { RANKING_PROJECTS, type RankingSnapshot } from "@/lib/ranking";
 import { METHODOLOGY_VERSION } from "@/lib/risk";
 import { advanceRanking, getRankingSnapshot } from "@/lib/server/ranking";
+import { pageOpenGraph } from "@/lib/site";
 
 /** A cold first visit may compute the ranking itself. */
 export const maxDuration = 60;
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
   title: r.metaTitle,
   description: r.metaDescription,
   alternates: { canonical: "/ranking" },
-  openGraph: { title: r.metaTitle, description: r.metaDescription, url: "/ranking" },
+  // The image comes from ./opengraph-image.tsx.
+  openGraph: pageOpenGraph({ title: r.metaTitle, description: r.metaDescription, url: "/ranking" }),
 };
 
 const strong = "font-semibold text-bone";

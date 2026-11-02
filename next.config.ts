@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/og": ["./assets/fonts/*.ttf"],
     "/opengraph-image": ["./assets/fonts/*.ttf"],
+    "/methodology/opengraph-image": ["./assets/fonts/*.ttf"],
+    "/ranking/opengraph-image": ["./assets/fonts/*.ttf"],
   },
   turbopack: {
     rules: {

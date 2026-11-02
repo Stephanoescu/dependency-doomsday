@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { ForecastForm } from "@/components/forecast-form";
 import { HomePreview } from "@/components/home-preview";
 import { RichText } from "@/components/rich-text";
 import { getMessages } from "@/lib/i18n";
+import { pageOpenGraph } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: pageOpenGraph({ title: getMessages().meta.title, description: getMessages().meta.description, url: "/" }),
+};
 
 export default function Home() {
   const t = getMessages();

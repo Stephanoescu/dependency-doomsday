@@ -5,6 +5,7 @@ import { RichText } from "@/components/rich-text";
 import { formatCompact } from "@/lib/format";
 import { fmt, getMessages } from "@/lib/i18n";
 import { METHODOLOGY_VERSION, RULES, type RiskLevel } from "@/lib/risk";
+import { pageOpenGraph } from "@/lib/site";
 
 const t = getMessages();
 const m = t.methodology;
@@ -13,6 +14,9 @@ const version = { version: METHODOLOGY_VERSION };
 export const metadata: Metadata = {
   title: m.metaTitle,
   description: m.metaDescription,
+  alternates: { canonical: "/methodology" },
+  // The image comes from ./opengraph-image.tsx.
+  openGraph: pageOpenGraph({ title: m.metaTitle, description: m.metaDescription, url: "/methodology" }),
 };
 
 const strong = "font-semibold text-bone";

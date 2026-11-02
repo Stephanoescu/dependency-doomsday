@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import type { ReactNode } from "react";
+import { formatCompact } from "@/lib/format";
 import { fmt, getMessages, plural } from "@/lib/i18n";
+import type { RankingHero } from "@/lib/ranking";
 import type { RiskLevel } from "@/lib/risk";
 import { imageHeadline, type ForecastSummary } from "./forecast";
 
@@ -358,6 +360,93 @@ function HomeCard({ url }: { url: string }) {
       <Footer url={url} size={20} />
     </Frame>
   );
+}
+
+export interface RankingImageHero {
+  user: string;
+  projects: string;
+  topPackage: string;
+}
+
+/** The first three heroes, worded for the ranking card. */
+export function rankingImageHeroes(heroes: RankingHero[]): RankingImageHero[] {
+  const t = getMessages();
+  return heroes.slice(0, 3).map((hero) => {
+    const top = hero.packages[0];
+    const downloads = top?.downloads ? ` · ${fmt(t.facts.downloads, { count: formatCompact(top.downloads) })}` : "";
+    return {
+      user: shortenLongWords(hero.user, 18),
+      projects: plural(t.ranking.reliedOn, hero.projects.length),
+      topPackage: top ? `${shortenLongWords(top.name, 24)}${downloads}` : "",
+    };
+  });
+}
+
+/** The ranking's card: its question, and the top three heroes when the ranking is in the cache. */
+function RankingCard({ url, heroes }: { url: string; heroes: RankingImageHero[] }) {
+  const t = getMessages();
+  const words = t.ranking.title.split(" ");
+  const title = (
+    <div style={{ display: "flex", flexWrap: "wrap", fontFamily: "Display", fontSize: heroes.length ? 72 : 84, lineHeight: 1.02 }}>
+      <span>{words.slice(0, -1).join(" ")}&nbsp;</span>
+      <span style={{ color: C.alarm }}>{words.at(-1)}</span>
+    </div>
+  );
+  return (
+    <Frame format="wide">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Brand />
+        <div style={{ display: "flex", fontSize: 20, color: C.fog }}>{t.og.rankingBadge}</div>
+      </div>
+      {heroes.length ? (
+        <div style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "center", gap: 34 }}>
+          {title}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", fontSize: 20, fontWeight: 700, letterSpacing: 4, color: C.amber }}>
+              {t.og.rankingHeroes.toUpperCase()}
+            </div>
+            <div style={{ display: "flex", gap: 20 }}>
+              {heroes.map((hero) => (
+                <div
+                  key={hero.user}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    gap: 8,
+                    padding: "18px 22px",
+                    border: `2px solid rgba(255,176,32,0.45)`,
+                    background: "rgba(255,176,32,0.05)",
+                  }}
+                >
+                  <div style={{ display: "flex", fontWeight: 700, fontSize: 34, color: C.bone }}>{hero.user}</div>
+                  <div style={{ display: "flex", fontSize: 19, color: C.amber }}>{hero.projects}</div>
+                  <div style={{ display: "flex", fontSize: 18, color: C.fog }}>{hero.topPackage}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flex: 1, alignItems: "center", gap: 56 }}>
+          <Clock minutes={3} level="high" size={330} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 26, flex: 1 }}>
+            {title}
+            <div style={{ display: "flex", fontSize: 26, lineHeight: 1.35, color: C.fog }}>{t.og.rankingBody}</div>
+          </div>
+        </div>
+      )}
+      <Footer url={url} size={20} />
+    </Frame>
+  );
+}
+
+export async function renderRankingImage(
+  url: string,
+  heroes: RankingImageHero[],
+  headers: Record<string, string>,
+): Promise<ImageResponse> {
+  return new ImageResponse(<RankingCard url={url} heroes={heroes} />, { ...IMAGE_SIZE.wide, fonts: await loadFonts(), headers });
 }
 
 export async function renderHomeImage(url: string): Promise<ImageResponse> {
