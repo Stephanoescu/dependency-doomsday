@@ -15,8 +15,8 @@ export const TTL = {
   result: HOUR,
 } as const;
 
-/** Bump the version to invalidate every cached entry after a shape change. */
-const PREFIX = "dd:v4:";
+/** Bump the version to invalidate every cached entry after a shape or methodology change. */
+const PREFIX = "dd:v5:";
 
 export const cacheKey = {
   npm: (name: string) => `${PREFIX}npm:${name}`,

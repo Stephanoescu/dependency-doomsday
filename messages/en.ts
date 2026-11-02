@@ -545,7 +545,7 @@ export const en = {
         },
         push: {
           rule: "No push to the GitHub repo in more than 24 months",
-          why: "Nobody is touching the code, not even unreleased changes.",
+          why: "Nobody is touching the code, not even unreleased changes. Not applied to packages that look possibly finished (below).",
         },
         noRepo: {
           rule: "No source repository linked",
@@ -559,11 +559,11 @@ export const en = {
       intro:
         "Some packages are old because they're done. The release-age penalty is **halved** when either of these is true — once, even if both are:",
       finished:
-        "**Possibly finished, not abandoned.** It has no dependencies of its own, fewer than {issues} open issues on GitHub, and it isn't deprecated or archived. A small utility with nothing left to fix doesn't need new releases. These packages are tagged so you can see why.",
+        "**Possibly finished, not abandoned.** It has no dependencies of its own, fewer than {issues} open issues on GitHub, and it isn't deprecated or archived. A small utility with nothing left to fix doesn't need new releases. The **push rule doesn't apply** to them either: a quiet repo is the same inactivity as the old release, and it's counted once. These packages are tagged so you can see why.",
       alive:
         "**Still alive.** The repo had a push in the last {months} months, even if nothing new was published.",
       example:
-        "Example: last released 4 years ago, no dependencies, 3 open issues → +{halved} instead of +{full}.",
+        "Example: last released 4 years ago, last push 3 years ago, no dependencies, 3 open issues → +{halved} instead of +{full} for the release, and nothing instead of +{push} for the push.",
     },
 
     colors: {
@@ -613,6 +613,10 @@ export const en = {
     versioning: {
       title: "Versioning",
       body: "Any change to a rule or a number becomes a new methodology version, and every forecast shows the version it was computed with. You're reading **Methodology v{version}**.",
+      changes: [
+        "**v2**: the push rule no longer applies to packages that look possibly finished, so the same inactivity isn't counted twice.",
+        "**v1**: first version.",
+      ],
     },
 
     cta: "Get your forecast",

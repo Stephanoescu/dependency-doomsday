@@ -8,7 +8,7 @@ import { writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { analyzePackages } from "@/lib/server/analyze";
 
-export const FIXTURE_PACKAGES = ["request", "left-pad", "react", "express", "lodash", "ms"];
+export const FIXTURE_PACKAGES = ["request", "left-pad", "react", "express", "lodash", "ms", "escape-html"];
 
 describe.runIf(import.meta.env.MODE === "capture")("capture risk fixtures", () => {
   it("fetches live data", { timeout: 60_000 }, async () => {

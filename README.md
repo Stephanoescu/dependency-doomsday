@@ -63,7 +63,7 @@ Or run a forecast and press **Copy badge**.
 
    The link comes with a 1200×630 or 1080×1920 image and a shields-style badge.
 
-## Methodology (v1)
+## Methodology (v2)
 
 | Rule                                                   | Risk points |
 | ------------------------------------------------------ | ----------- |
@@ -71,12 +71,14 @@ Or run a forecast and press **Copy badge**.
 | A single npm maintainer                                | +30         |
 | Last release more than 36 months ago                   | +40         |
 | Otherwise, last release more than 18 months ago        | +25         |
-| No push to the GitHub repo in more than 24 months      | +15         |
+| No push to the GitHub repo in more than 24 months¹     | +15         |
 | No linked repository                                   | +10         |
 
 - **Discounts:** the release-age penalty is **halved** (once) for packages that look *possibly
   finished*, or when the repo had a push in the last 12 months. A package looks possibly finished when
   it has no dependencies of its own, fewer than 10 open issues, and isn't deprecated or archived.
+- ¹ **Not for possibly finished packages:** their quiet repo is the same inactivity as their old
+  release, so it's counted once (new in v2).
 - **Cap and colors:** risk is capped at 100. Green is 0–29, yellow 30–59, red 60 and up.
 - **Critical:** a single maintainer and more than 1M downloads a month. Critical packages weigh double
   in the project score.
@@ -152,7 +154,7 @@ instance may get the generic image, and rate limits are only approximate. Upstas
    - If you connect Upstash through **Vercel → Storage** instead, and it names the variables
      differently (for example `KV_REST_API_URL`), add the two names above with the same values.
 4. **Verify.** Run a forecast, then open **Data Browser** in Upstash. You should see keys like
-   `dd:v4:npm:express` and `dd:rl:analyze:…`.
+   `dd:v5:npm:express` and `dd:rl:analyze:…`.
 
 An uncached forecast costs a few Redis commands per package, and a hobby deployment stays far below
 the free plan. If Redis is unreachable, the app treats it as a cache miss and keeps working.

@@ -36,11 +36,11 @@ describe("MemoryCache", () => {
 
 describe("cacheKey", () => {
   it("namespaces and versions keys", () => {
-    expect(cacheKey.npm("@babel/core")).toBe("dd:v4:npm:@babel/core");
-    expect(cacheKey.downloads("react")).toBe("dd:v4:dl:react");
+    expect(cacheKey.npm("@babel/core")).toBe("dd:v5:npm:@babel/core");
+    expect(cacheKey.downloads("react")).toBe("dd:v5:dl:react");
   });
 
   it("lowercases GitHub keys, since GitHub names are case-insensitive", () => {
-    expect(cacheKey.github("Microsoft", "TypeScript")).toBe("dd:v4:gh:microsoft/typescript");
+    expect(cacheKey.github("Microsoft", "TypeScript")).toBe("dd:v5:gh:microsoft/typescript");
   });
 });

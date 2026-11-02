@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-01T22:19:21.334Z",
+  "capturedAt": "2026-11-02T22:28:29.010Z",
   "packages": [
     {
       "name": "request",
@@ -19,6 +19,7 @@
         "lastPublishAt": "2020-02-11T16:35:36.122Z",
         "createdAt": "2011-01-22T00:36:12.640Z",
         "dependencyCount": 20,
+        "funding": [],
         "repositoryUrl": "https://github.com/request/request",
         "github": {
           "owner": "request",
@@ -26,7 +27,7 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 47551176,
+      "downloads": 44281680,
       "githubStatus": "ok",
       "github": {
         "fullName": "request/request",
@@ -53,6 +54,7 @@
         "lastPublishAt": "2018-04-09T01:10:45.796Z",
         "createdAt": "2014-03-14T09:09:20.762Z",
         "dependencyCount": 0,
+        "funding": [],
         "repositoryUrl": "https://github.com/stevemao/left-pad",
         "github": {
           "owner": "stevemao",
@@ -60,7 +62,7 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 12252317,
+      "downloads": 10953360,
       "githubStatus": "ok",
       "github": {
         "fullName": "left-pad/left-pad",
@@ -87,6 +89,7 @@
         "lastPublishAt": "2026-10-31T09:15:39.748Z",
         "createdAt": "2011-10-26T17:46:21.942Z",
         "dependencyCount": 0,
+        "funding": [],
         "repositoryUrl": "https://github.com/react/react",
         "github": {
           "owner": "react",
@@ -94,14 +97,14 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 743344670,
+      "downloads": 717564263,
       "githubStatus": "ok",
       "github": {
         "fullName": "react/react",
         "pushedAt": "2026-10-31T13:53:11Z",
         "archived": false,
-        "openIssues": 1484,
-        "stars": 252068,
+        "openIssues": 1492,
+        "stars": 251873,
         "ownerType": "Organization"
       }
     },
@@ -124,6 +127,12 @@
         "lastPublishAt": "2026-10-09T12:56:54.505Z",
         "createdAt": "2010-12-29T19:38:25.450Z",
         "dependencyCount": 28,
+        "funding": [
+          {
+            "url": "https://opencollective.com/express",
+            "type": "opencollective"
+          }
+        ],
         "repositoryUrl": "https://github.com/expressjs/express",
         "github": {
           "owner": "expressjs",
@@ -131,14 +140,14 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 575482771,
+      "downloads": 553278179,
       "githubStatus": "ok",
       "github": {
         "fullName": "expressjs/express",
-        "pushedAt": "2026-11-01T09:58:22Z",
+        "pushedAt": "2026-11-02T20:15:26Z",
         "archived": false,
-        "openIssues": 263,
-        "stars": 69584,
+        "openIssues": 260,
+        "stars": 69582,
         "ownerType": "Organization"
       }
     },
@@ -157,6 +166,7 @@
         "lastPublishAt": "2026-04-01T21:01:20.458Z",
         "createdAt": "2012-04-23T16:37:11.912Z",
         "dependencyCount": 0,
+        "funding": [],
         "repositoryUrl": "https://github.com/lodash/lodash",
         "github": {
           "owner": "lodash",
@@ -164,14 +174,14 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 636183624,
+      "downloads": 598124247,
       "githubStatus": "ok",
       "github": {
         "fullName": "lodash/lodash",
         "pushedAt": "2026-10-01T23:04:09Z",
         "archived": false,
-        "openIssues": 123,
-        "stars": 61272,
+        "openIssues": 124,
+        "stars": 61270,
         "ownerType": "Organization"
       }
     },
@@ -195,6 +205,7 @@
         "lastPublishAt": "2025-08-27T14:00:01.232Z",
         "createdAt": "2011-12-21T19:38:08.664Z",
         "dependencyCount": 0,
+        "funding": [],
         "repositoryUrl": "https://github.com/vercel/ms",
         "github": {
           "owner": "vercel",
@@ -202,14 +213,48 @@
         }
       },
       "downloadsStatus": "ok",
-      "downloads": 2191354534,
+      "downloads": 2093905087,
       "githubStatus": "ok",
       "github": {
         "fullName": "vercel/ms",
         "pushedAt": "2026-05-20T22:24:50Z",
         "archived": false,
         "openIssues": 41,
-        "stars": 5559,
+        "stars": 5560,
+        "ownerType": "Organization"
+      }
+    },
+    {
+      "name": "escape-html",
+      "field": "dependencies",
+      "npmStatus": "ok",
+      "npm": {
+        "name": "escape-html",
+        "latestVersion": "1.0.3",
+        "deprecated": null,
+        "unpublished": false,
+        "maintainers": [
+          "dougwilson"
+        ],
+        "lastPublishAt": "2015-09-01T04:47:22.713Z",
+        "createdAt": "2012-08-20T22:54:26.303Z",
+        "dependencyCount": 0,
+        "funding": [],
+        "repositoryUrl": "https://github.com/component/escape-html",
+        "github": {
+          "owner": "component",
+          "repo": "escape-html"
+        }
+      },
+      "downloadsStatus": "ok",
+      "downloads": 491986891,
+      "githubStatus": "ok",
+      "github": {
+        "fullName": "component/escape-html",
+        "pushedAt": "2022-09-16T12:09:21Z",
+        "archived": false,
+        "openIssues": 3,
+        "stars": 491,
         "ownerType": "Organization"
       }
     }

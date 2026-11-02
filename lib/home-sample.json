@@ -1,13 +1,13 @@
 {
   "label": "expressjs/express",
   "path": "/r/github/expressjs/express",
-  "generatedAt": "2026-11-02T02:13:07.239Z",
-  "score": 80,
+  "generatedAt": "2026-11-02T22:29:58.326Z",
+  "score": 81,
   "minutesToMidnight": 8,
   "level": "low",
-  "headline": "expressjs/express: its most critical dependency (**once**, 664.5M downloads/month) has **a single npm maintainer**.",
+  "headline": "expressjs/express: its most critical dependency (**once**, 639.2M downloads/month) has **a single npm maintainer**.",
   "sentences": [
-    "28 dependencies checked: 3 high risk, 1 to watch, 24 low risk.",
+    "28 dependencies checked: 2 high risk, 2 to watch, 24 low risk.",
     "4 have a single npm maintainer — 4 of them critical, with over 1M downloads a month.",
     "The oldest release is 10 years old (once)."
   ],
@@ -16,35 +16,35 @@
       "name": "accepts",
       "risk": 13,
       "level": "low",
-      "weight": 9.81,
+      "weight": 9.79,
       "critical": false
     },
     {
       "name": "body-parser",
       "risk": 0,
       "level": "low",
-      "weight": 9.77,
+      "weight": 9.76,
       "critical": false
     },
     {
       "name": "content-disposition",
       "risk": 0,
       "level": "low",
-      "weight": 9.8,
+      "weight": 9.78,
       "critical": false
     },
     {
       "name": "content-type",
       "risk": 0,
       "level": "low",
-      "weight": 10,
+      "weight": 9.99,
       "critical": false
     },
     {
       "name": "cookie",
       "risk": 0,
       "level": "low",
-      "weight": 9.96,
+      "weight": 9.95,
       "critical": false
     },
     {
@@ -65,147 +65,147 @@
       "name": "depd",
       "risk": 85,
       "level": "high",
-      "weight": 19.6,
+      "weight": 19.56,
       "critical": true
     },
     {
       "name": "encodeurl",
       "risk": 0,
       "level": "low",
-      "weight": 9.8,
+      "weight": 9.79,
       "critical": false
     },
     {
       "name": "escape-html",
-      "risk": 65,
-      "level": "high",
-      "weight": 19.41,
+      "risk": 50,
+      "level": "mid",
+      "weight": 19.38,
       "critical": true
     },
     {
       "name": "etag",
       "risk": 20,
       "level": "low",
-      "weight": 9.69,
+      "weight": 9.67,
       "critical": false
     },
     {
       "name": "finalhandler",
       "risk": 0,
       "level": "low",
-      "weight": 9.8,
+      "weight": 9.78,
       "critical": false
     },
     {
       "name": "fresh",
       "risk": 13,
       "level": "low",
-      "weight": 9.77,
+      "weight": 9.76,
       "critical": false
     },
     {
       "name": "http-errors",
       "risk": 0,
       "level": "low",
-      "weight": 9.85,
+      "weight": 9.83,
       "critical": false
     },
     {
       "name": "merge-descriptors",
       "risk": 43,
       "level": "mid",
-      "weight": 19.44,
+      "weight": 19.42,
       "critical": true
     },
     {
       "name": "mime-types",
       "risk": 0,
       "level": "low",
-      "weight": 10.06,
+      "weight": 10.04,
       "critical": false
     },
     {
       "name": "on-finished",
       "risk": 0,
       "level": "low",
-      "weight": 9.78,
+      "weight": 9.77,
       "critical": false
     },
     {
       "name": "once",
       "risk": 70,
       "level": "high",
-      "weight": 19.64,
+      "weight": 19.61,
       "critical": true
     },
     {
       "name": "parseurl",
       "risk": 20,
       "level": "low",
-      "weight": 9.68,
+      "weight": 9.67,
       "critical": false
     },
     {
       "name": "proxy-addr",
       "risk": 0,
       "level": "low",
-      "weight": 9.67,
+      "weight": 9.65,
       "critical": false
     },
     {
       "name": "qs",
       "risk": 0,
       "level": "low",
-      "weight": 9.88,
+      "weight": 9.87,
       "critical": false
     },
     {
       "name": "range-parser",
       "risk": 0,
       "level": "low",
-      "weight": 9.74,
+      "weight": 9.73,
       "critical": false
     },
     {
       "name": "router",
       "risk": 13,
       "level": "low",
-      "weight": 9.49,
+      "weight": 9.48,
       "critical": false
     },
     {
       "name": "send",
       "risk": 0,
       "level": "low",
-      "weight": 9.79,
+      "weight": 9.77,
       "critical": false
     },
     {
       "name": "serve-static",
       "risk": 0,
       "level": "low",
-      "weight": 9.78,
+      "weight": 9.76,
       "critical": false
     },
     {
       "name": "statuses",
       "risk": 0,
       "level": "low",
-      "weight": 9.9,
+      "weight": 9.88,
       "critical": false
     },
     {
       "name": "type-is",
       "risk": 0,
       "level": "low",
-      "weight": 9.8,
+      "weight": 9.78,
       "critical": false
     },
     {
       "name": "vary",
       "risk": 20,
       "level": "low",
-      "weight": 9.66,
+      "weight": 9.67,
       "critical": false
     }
   ]

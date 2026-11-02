@@ -121,14 +121,19 @@ describe("scorePackage", () => {
       github: { openIssues: 9, pushedAt: ago(30) },
     };
 
-    it("halves the release penalty and flags the package", () => {
+    it("halves the release penalty, skips the push rule and flags the package", () => {
       const result = score(finished);
       expect(result.possiblyFinished).toBe(true);
       expect(result.rules).toEqual([
         { id: "stale-release", points: 20, basePoints: 40, months: 48, halvedBy: ["possibly-finished"] },
-        { id: "stale-push", points: 15, months: 30 },
       ]);
-      expect(result.risk).toBe(35);
+      expect(result.risk).toBe(20);
+    });
+
+    it("still applies the push rule when the package isn't possibly finished", () => {
+      const result = score({ ...finished, npm: { dependencyCount: 1, lastPublishAt: ago(48) } });
+      expect(result.possiblyFinished).toBe(false);
+      expect(result.rules).toContainEqual({ id: "stale-push", points: 15, months: 30 });
     });
 
     it("rounds a halved 25 up to 13", () => {
@@ -274,7 +279,7 @@ describe("summarize", () => {
 
   it("is versioned", () => {
     expect(summarize([]).methodology).toBe(METHODOLOGY_VERSION);
-    expect(METHODOLOGY_VERSION).toBe(1);
+    expect(METHODOLOGY_VERSION).toBe(2);
   });
 });
 

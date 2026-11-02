@@ -1,11 +1,13 @@
 import { hasData, type PackageData } from "@/lib/analysis/types";
 
 /**
- * Methodology v1 — fixed, explainable rules. No AI, no hidden weights.
- * Any change to a number below is a new methodology version: bump
+ * Methodology v2 — fixed, explainable rules. No AI, no hidden weights.
+ * Any change to a rule or a number below is a new methodology version: bump
  * METHODOLOGY_VERSION and update /methodology (messages/en.ts → methodology).
+ *
+ * v2: the push rule no longer applies to "possibly finished" packages.
  */
-export const METHODOLOGY_VERSION = 1;
+export const METHODOLOGY_VERSION = 2;
 
 export const RULES = {
   /** Deprecated or unpublished on npm, or the GitHub repo is archived: maximum risk. */
@@ -13,6 +15,7 @@ export const RULES = {
   singleMaintainer: 30,
   releaseOver36Months: 40,
   releaseOver18Months: 25,
+  /** Skipped for "possibly finished" packages: their quiet repo is the same inactivity as their old release. */
   pushOver24Months: 15,
   noRepository: 10,
   /** The release-age penalty is halved (once) by any of the reasons below. */
@@ -62,7 +65,7 @@ export interface PackageRisk {
   rules: AppliedRule[];
   /** Single maintainer and more than 1M downloads a month. */
   critical: boolean;
-  /** No dependencies, few open issues, not deprecated/archived, and an old release. */
+  /** No dependencies, few open issues, not deprecated/archived, and an old release. The push rule is skipped. */
   possiblyFinished: boolean;
   /** Scored without GitHub data (no repo, other host, not found, limit or error). */
   npmDataOnly: boolean;
@@ -107,7 +110,7 @@ export function packageWeight(downloads: number | null, critical: boolean): numb
   return critical ? base * RULES.criticalWeight : base;
 }
 
-/** Applies Methodology v1 to one package. Returns null when it has no npm data. */
+/** Applies the methodology to one package. Returns null when it has no npm data. */
 export function scorePackage(pkg: PackageData, now: number): PackageRisk | null {
   if (!hasData(pkg) || !pkg.npm) return null;
   const { npm, github } = pkg;
@@ -147,7 +150,8 @@ export function scorePackage(pkg: PackageData, now: number): PackageRisk | null 
     });
   }
 
-  if (pushMonths !== null && pushMonths > 24) {
+  // A finished package's quiet repo is the same inactivity its old release already showed: count it once.
+  if (pushMonths !== null && pushMonths > 24 && !possiblyFinished) {
     rules.push({ id: "stale-push", points: RULES.pushOver24Months, months: Math.floor(pushMonths) });
   }
 

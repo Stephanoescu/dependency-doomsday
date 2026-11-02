@@ -142,6 +142,7 @@ export default function MethodologyPage() {
             {fmt(m.discounts.example, {
               full: RULES.releaseOver36Months,
               halved: Math.round(RULES.releaseOver36Months * RULES.halvingFactor),
+              push: RULES.pushOver24Months,
             })}
           </p>
         </Section>
@@ -202,6 +203,13 @@ export default function MethodologyPage() {
           <p>
             <Rich text={fmt(m.versioning.body, version)} />
           </p>
+          <ul className="space-y-2 font-mono text-sm">
+            {m.versioning.changes.map((change) => (
+              <li key={change} className="border-l-2 border-line pl-4">
+                <Rich text={change} />
+              </li>
+            ))}
+          </ul>
         </Section>
 
         <Link
