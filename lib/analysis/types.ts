@@ -88,6 +88,14 @@ export type AnalysisEvent =
   | { type: "error"; error: "bad-request" | "internal" }
   | { type: "error"; error: "rate-limited"; retryAfter: number };
 
+/**
+ * Every package got the GitHub data it was supposed to: none skipped by the
+ * rate limit or a GitHub error. Incomplete results are shown, never cached.
+ */
+export function isComplete(packages: Pick<PackageData, "githubStatus">[]): boolean {
+  return packages.every((p) => p.githubStatus !== "rate-limited" && p.githubStatus !== "error");
+}
+
 /** A package without npm data cannot be scored ("no data"). */
 export function hasData(pkg: PackageData): boolean {
   return pkg.npmStatus === "ok" && pkg.npm !== null;

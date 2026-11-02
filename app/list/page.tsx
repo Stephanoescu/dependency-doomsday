@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ErrorIcon } from "@/components/icons";
 import { SharedForecast, SharedForecastFallback } from "@/components/shared-forecast";
 import { fmt, getMessages } from "@/lib/i18n";
+import { cachedForecast } from "@/lib/server/forecast";
 import { decodeList, ogImagePath, sharePath, type ShareSource } from "@/lib/share/links";
 
 type Props = PageProps<"/list">;
@@ -48,7 +49,7 @@ async function Forecast(props: Props) {
       </div>
     );
   }
-  return <SharedForecast source={source} path={sharePath(source)} />;
+  return <SharedForecast source={source} path={sharePath(source)} initial={await cachedForecast(source)} />;
 }
 
 /** /list?d=<lz> — a pasted package.json's forecast. The link holds package names only. */

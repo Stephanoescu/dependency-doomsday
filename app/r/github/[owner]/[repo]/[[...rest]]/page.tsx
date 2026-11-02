@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SharedForecast, SharedForecastFallback } from "@/components/shared-forecast";
 import { fmt, getMessages } from "@/lib/i18n";
+import { cachedForecast } from "@/lib/server/forecast";
 import { ogImagePath, repoSourceFromRoute, sharePath, sourceLabel } from "@/lib/share/links";
 
 type Props = PageProps<"/r/github/[owner]/[repo]/[[...rest]]">;
@@ -32,7 +33,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 async function Forecast(props: Props) {
   const source = await sourceOf(props);
   if (!source) notFound();
-  return <SharedForecast source={source} path={sharePath(source)} />;
+  return <SharedForecast source={source} path={sharePath(source)} initial={await cachedForecast(source)} />;
 }
 
 /** /r/github/owner/repo[/tree/<ref>/<path>] — a repo's forecast, recomputed from cache. */

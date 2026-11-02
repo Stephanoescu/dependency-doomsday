@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { depsKey, imageHeadline, summaryFor, TIMED_OUT, withDeadline } from "./forecast";
+import { cachedForecast, depsKey, imageHeadline, summaryFor, TIMED_OUT, withDeadline } from "./forecast";
 
 const calls: string[] = [];
 
@@ -94,6 +94,43 @@ describe("summaryFor", () => {
     expect(imageHeadline(list.summary)).toBe(
       "This project: its most critical dependency (**left-pad**, 2M downloads/month) has **a single npm maintainer**.",
     );
+  });
+
+  it("serves the full result from cache only, for server-rendered share links", async () => {
+    const source = { kind: "repo" as const, ref: { owner: "acme", repo: "shop" }, includeDev: false };
+    expect(await cachedForecast(source)).toBeNull();
+    expect(calls).toEqual([]);
+
+    await summaryFor(source);
+    calls.length = 0;
+    const cached = await cachedForecast(source);
+    expect(cached?.parsed).toMatchObject({ ok: true, projectName: "shop", ref: source.ref, truncated: 0 });
+    expect(cached?.analysis.packages.map((p) => p.name)).toEqual(["left-pad"]);
+    expect(calls).toEqual([]);
+  });
+
+  it("doesn't cache summaries that are missing GitHub data", async () => {
+    vi.stubGlobal("fetch", async (input: string) => {
+      const url = new URL(input);
+      calls.push(`${url.host}${url.pathname}`);
+      if (url.pathname === "/rate_limit") {
+        return Response.json({ resources: { core: { limit: 60, remaining: 0, reset: 2_000_000_000 } } });
+      }
+      if (url.host === "registry.npmjs.org") {
+        return Response.json({
+          "dist-tags": { latest: "1.0.0" },
+          maintainers: [{ name: "solo" }],
+          time: { "1.0.0": new Date().toISOString() },
+          versions: { "1.0.0": {} },
+          repository: "github:acme/x",
+        });
+      }
+      if (url.host === "api.npmjs.org") return Response.json({ downloads: 1, package: "x" });
+      return new Response("nope", { status: 404 });
+    });
+    const source = { kind: "list" as const, list: { dependencies: ["x"], devDependencies: [] } };
+    expect((await summaryFor(source)).ok).toBe(true);
+    expect(await cachedForecast(source)).toBeNull();
   });
 
   it("decodes list sources without touching GitHub", async () => {

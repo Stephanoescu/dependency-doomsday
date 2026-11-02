@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import { isComplete, type AnalysisResult } from "@/lib/analysis/types";
 import { getMessages } from "@/lib/i18n";
 import { formatGitHubRef } from "@/lib/input/github-url";
 import { parsePackageJson } from "@/lib/input/package-json";
-import type { Dependency, InputErrorCode } from "@/lib/input/types";
+import type { Dependency, GitHubRef, InputErrorCode, ParseSuccess } from "@/lib/input/types";
 import { findHeadline, resultState, writeFinding, type Finding, type ResultState } from "@/lib/narrative";
 import type { RiskLevel } from "@/lib/risk";
 import { listDependencies, sourceLabel, type ShareSource } from "@/lib/share/links";
@@ -57,13 +57,25 @@ export function imageHeadline(summary: ForecastSummary): string {
   return writeFinding(summary.finding, t.headline, { project: summary.label || t.thisProject });
 }
 
+/**
+ * Called after every analysis: the small summary (for images and badges) and
+ * the full result (so a share link opened soon after renders on the server).
+ */
 export async function saveSummary(deps: Dependency[], result: AnalysisResult, label?: string): Promise<void> {
+  // A forecast missing GitHub data (rate limit, outage) shouldn't stick around for hours.
+  if (!isComplete(result.packages)) return;
+  const key = depsKey(deps);
   await getCache().setMany([
-    { key: cacheKey.summary(depsKey(deps)), value: summarizeResult(result, label), ttl: TTL.summary },
+    { key: cacheKey.summary(key), value: summarizeResult(result, label), ttl: TTL.summary },
+    { key: cacheKey.result(key), value: result, ttl: TTL.result },
   ]);
 }
 
-type CachedDeps = { deps: Dependency[]; projectName?: string };
+type CachedDeps = Pick<ParseSuccess, "projectName" | "skipped" | "truncated"> & { deps: Dependency[] };
+
+function repoDepsKey(source: Extract<ShareSource, { kind: "repo" }>): string {
+  return cacheKey.repoDeps(`${formatGitHubRef(source.ref)}${source.includeDev ? "+dev" : ""}`);
+}
 
 /** The dependency list behind a share link: decoded from the URL, or read from the repo (cached 1 h). */
 export async function resolveSource(
@@ -73,7 +85,7 @@ export async function resolveSource(
     return { ok: true, deps: listDependencies(source.list), label: source.list.projectName };
   }
 
-  const key = cacheKey.repoDeps(`${formatGitHubRef(source.ref)}${source.includeDev ? "+dev" : ""}`);
+  const key = repoDepsKey(source);
   const [cached] = await getCache().getMany<CachedDeps>([key]);
   if (cached) return { ok: true, deps: cached.deps, label: sourceLabel(source) };
 
@@ -83,8 +95,42 @@ export async function resolveSource(
   if (!parsed.ok) return { ok: false, error: parsed.error };
 
   const deps = parsed.packages.map(({ name, field }) => ({ name, field }));
-  await getCache().setMany([{ key, value: { deps } satisfies CachedDeps, ttl: TTL.deps }]);
+  const value: CachedDeps = {
+    deps,
+    projectName: parsed.projectName,
+    skipped: parsed.skipped,
+    truncated: parsed.truncated,
+  };
+  await getCache().setMany([{ key, value, ttl: TTL.deps }]);
   return { ok: true, deps, label: sourceLabel(source) };
+}
+
+/**
+ * The full forecast for a share link, from cache only — never computes or
+ * fetches. Lets the page render the result on the server when someone
+ * analyzed it within the last hour.
+ */
+export async function cachedForecast(
+  source: ShareSource,
+): Promise<{ parsed: ParseSuccess & { ref?: GitHubRef }; analysis: AnalysisResult } | null> {
+  let parsed: ParseSuccess & { ref?: GitHubRef };
+  if (source.kind === "list") {
+    const deps = listDependencies(source.list);
+    parsed = { ok: true, projectName: source.list.projectName, packages: deps, skipped: [], truncated: 0 };
+  } else {
+    const [deps] = await getCache().getMany<CachedDeps>([repoDepsKey(source)]);
+    if (!deps) return null;
+    parsed = {
+      ok: true,
+      projectName: deps.projectName,
+      packages: deps.deps,
+      skipped: deps.skipped ?? [],
+      truncated: deps.truncated ?? 0,
+      ref: source.ref,
+    };
+  }
+  const [analysis] = await getCache().getMany<AnalysisResult>([cacheKey.result(depsKey(parsed.packages))]);
+  return analysis ? { parsed, analysis } : null;
 }
 
 /** Summary for a share link: from cache when anyone analyzed it recently, otherwise computed. */

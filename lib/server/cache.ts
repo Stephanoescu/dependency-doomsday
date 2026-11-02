@@ -11,6 +11,8 @@ export const TTL = {
   summary: 6 * HOUR,
   /** Dependency lists read from a repo's package.json. */
   deps: HOUR,
+  /** Full analysis results (up to ~150 KB), for server-rendering fresh share links. */
+  result: HOUR,
 } as const;
 
 /** Bump the version to invalidate every cached entry after a shape change. */
@@ -21,7 +23,10 @@ export const cacheKey = {
   downloads: (name: string) => `${PREFIX}dl:${name}`,
   github: (owner: string, repo: string) => `${PREFIX}gh:${owner}/${repo}`.toLowerCase(),
   summary: (depsHash: string) => `${PREFIX}sum:${depsHash}`,
+  result: (depsHash: string) => `${PREFIX}res:${depsHash}`,
   repoDeps: (ref: string) => `${PREFIX}deps:${ref.toLowerCase()}`,
+  ranking: () => `${PREFIX}ranking`,
+  rankingProgress: () => `${PREFIX}ranking:progress`,
 };
 
 export interface CacheWrite {

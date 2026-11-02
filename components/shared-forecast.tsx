@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnalysisProgress } from "@/components/analysis-progress";
 import { ErrorIcon } from "@/components/icons";
+import { DoomsdayClock } from "@/components/result/doomsday-clock";
 import { ForecastResult } from "@/components/result/forecast-result";
 import { ResultNotices } from "@/components/result/result-notices";
 import { runAnalysis } from "@/lib/analysis/client";
@@ -21,12 +22,21 @@ type State =
   | { kind: "done"; data: ForecastHandoff };
 
 /** Recomputes a shared forecast from its link (cached server-side), or shows the one just made. */
-export function SharedForecast({ source, path }: { source: ShareSource; path: string }) {
+export function SharedForecast({
+  source,
+  path,
+  initial,
+}: {
+  source: ShareSource;
+  path: string;
+  /** Rendered on the server from cache when this link was analyzed recently. */
+  initial?: ForecastHandoff | null;
+}) {
   const t = getMessages();
   const router = useRouter();
   const [state, setState] = useState<State>(() => {
-    const handed = peekForecast(path);
-    return handed ? { kind: "done", data: handed } : { kind: "loading", done: null, total: 0 };
+    const ready = peekForecast(path) ?? initial;
+    return ready ? { kind: "done", data: ready } : { kind: "loading", done: null, total: 0 };
   });
   const needsWork = state.kind === "loading";
 
@@ -99,41 +109,52 @@ export function SharedForecast({ source, path }: { source: ShareSource; path: st
     );
   }
 
-  const label = sourceLabel(source);
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pt-12 sm:pt-20">
-      <div>
-        <p className="font-mono text-xs tracking-[0.25em] text-amber uppercase">
-          {"// "}
-          {t.shared.eyebrow}
-        </p>
-        <h1 className="mt-3 font-display text-4xl break-words sm:text-6xl">{label ?? t.shared.untitled}</h1>
-      </div>
+    <PendingShell label={sourceLabel(source) ?? t.shared.untitled}>
       {state.kind === "loading" ? (
         <AnalysisProgress done={state.done} total={state.total} current={state.current} />
       ) : (
-        <div role="alert" className="flex gap-3 border border-alarm/60 bg-alarm/10 p-4 text-sm leading-relaxed text-bone">
-          <ErrorIcon className="mt-0.5 size-4 shrink-0 text-alarm" />
-          <p>{state.message}</p>
+        <div className="space-y-4">
+          <div role="alert" className="flex gap-3 border border-alarm/60 bg-alarm/10 p-4 text-sm leading-relaxed text-bone">
+            <ErrorIcon className="mt-0.5 size-4 shrink-0 text-alarm" />
+            <p>{state.message}</p>
+          </div>
+          <Link href="/" className="inline-block font-mono text-xs tracking-[0.15em] text-fog uppercase hover:text-bone">
+            ← {t.shared.home}
+          </Link>
         </div>
       )}
-      <Link href="/" className="inline-block font-mono text-xs tracking-[0.15em] text-fog uppercase hover:text-bone">
-        ← {t.shared.home}
-      </Link>
+    </PendingShell>
+  );
+}
+
+/**
+ * Same frame as the result's first screen (headline, clock, score area), so
+ * swapping in the result doesn't push the page around.
+ */
+function PendingShell({ label, children }: { label?: string; children: ReactNode }) {
+  const t = getMessages();
+  return (
+    <div className="space-y-10 pt-6 sm:pt-12">
+      <div className="text-center sm:text-left">
+        <p className="mb-2 font-mono text-[11px] tracking-[0.2em] text-amber uppercase">{t.shared.eyebrow}</p>
+        <h1 className="mx-auto max-w-3xl font-display text-[1.55rem] leading-[1.08] break-words text-balance sm:mx-0 sm:text-5xl">
+          {label ?? "\u00a0"}
+        </h1>
+      </div>
+      <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-10">
+        <DoomsdayClock minutes={null} level={null} className="w-[min(58vw,30dvh,300px)] shrink-0 sm:w-[min(34vw,320px)]" />
+        <div className="w-full max-w-md">{children}</div>
+      </div>
     </div>
   );
 }
 
 /** Static shell while the route params are read. */
 export function SharedForecastFallback() {
-  const t = getMessages();
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pt-12 sm:pt-20">
-      <p className="font-mono text-xs tracking-[0.25em] text-amber uppercase">
-        {"// "}
-        {t.shared.eyebrow}
-      </p>
+    <PendingShell>
       <AnalysisProgress done={null} total={0} />
-    </div>
+    </PendingShell>
   );
 }
