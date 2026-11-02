@@ -85,7 +85,9 @@ export function PackageDialog({ pkg, now, onClose }: Props) {
           <section>
             <h3 className="font-mono text-[11px] tracking-[0.2em] text-dim uppercase">{t.detail.why}</h3>
             {!risk ? (
-              <p className="mt-2 text-sm text-fog">{t.detail.noData}</p>
+              <p className="mt-2 text-sm text-fog">
+                {pkg.npmStatus === "not-found" ? t.detail.notOnNpm : t.detail.noData}
+              </p>
             ) : risk.rules.length === 0 ? (
               <p className="mt-2 text-sm text-fog">{t.detail.noRules}</p>
             ) : (

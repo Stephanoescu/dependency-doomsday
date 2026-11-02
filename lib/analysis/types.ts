@@ -103,3 +103,18 @@ export function hasData(pkg: PackageData): boolean {
 
 /** Below this many remaining unauthenticated requests, the UI warns about the GitHub limit. */
 export const GITHUB_LOW_QUOTA = 20;
+
+/**
+ * Why packages were left out of the score: npm answered 404 (usually a
+ * private package) or a source failed (network error, timeout, 5xx).
+ */
+export function unscoredReasons(packages: PackageData[]): { notFound: number; failed: number } {
+  let notFound = 0;
+  let failed = 0;
+  for (const pkg of packages) {
+    if (hasData(pkg)) continue;
+    if (pkg.npmStatus === "not-found") notFound++;
+    else failed++;
+  }
+  return { notFound, failed };
+}

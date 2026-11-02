@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type DragEvent, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { AnalysisProgress, progressText } from "@/components/analysis-progress";
 import { ErrorIcon, Spinner, UploadIcon } from "@/components/icons";
 import { MonorepoHint } from "@/components/monorepo-hint";
@@ -69,6 +69,19 @@ export function ForecastForm({ hero }: { hero?: ReactNode }) {
   const dragDepth = useRef(0);
 
   const loading = status.kind === "reading" || status.kind === "analyzing";
+
+  // Next keeps this page mounted but hidden (<Activity>) after navigating to a result, and
+  // restores it as it was. The text stays; a finished or interrupted run must not, or the
+  // button comes back stuck on "Checking 28/28…". This cleanup runs when the page is hidden.
+  useLayoutEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      dragDepth.current = 0;
+      setDragging(false);
+      setStatus({ kind: "idle" });
+    };
+  }, []);
 
   // Dropping a file outside the drop zone would otherwise navigate away from the page.
   useEffect(() => {

@@ -105,6 +105,7 @@ npm run dev          # http://localhost:3000
 | `npm run dev`                 | Development server                                                               |
 | `npm run build && npm start`  | Production build and server                                                      |
 | `npm test`                    | Unit tests (Vitest)                                                              |
+| `npm run test:e2e`            | Browser tests (Playwright) against a production build. Uses your installed Chrome and fakes `/api/*`, so no npm or GitHub requests. |
 | `npm run lint` / `typecheck`  | ESLint / TypeScript                                                              |
 | `npm run check:token`         | Confirms `GITHUB_TOKEN` is loaded and GitHub grants 5,000 requests/hour (never prints the token) |
 | `npm run check:fit`           | Checks the result's first screen fits 390×844 and 360×740. Needs a running server and your installed Chrome. |

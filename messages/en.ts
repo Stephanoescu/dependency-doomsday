@@ -104,6 +104,12 @@ export const en = {
       one: "{count} more was left out — a forecast covers up to {max} packages.",
       other: "{count} more were left out — a forecast covers up to {max} packages.",
     },
+    /** npm answered 404. */
+    notOnNpm: {
+      one: "{count} package wasn't found on npm (it may be private). It's left out of the score.",
+      other: "{count} packages weren't found on npm (they may be private). They're left out of the score.",
+    },
+    /** A network error, timeout or 5xx. */
     noData: {
       one: "{count} package has no npm data because a source failed. It's left out of the score.",
       other:
@@ -228,6 +234,7 @@ export const en = {
     why: "Why",
     noRules: "No risk rules apply. Healthy by every measure we check.",
     noData: "npm didn't answer for this package, so it isn't scored.",
+    notOnNpm: "npm doesn't have this package. It may be private, or the name may be misspelled. It isn't scored.",
     evidence: "Evidence",
     maintainers: "npm maintainers",
     npm: "npm page",

@@ -1,6 +1,6 @@
 import { GitHubQuotaNotice } from "@/components/github-quota-notice";
 import { MonorepoHint } from "@/components/monorepo-hint";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import { unscoredReasons, type AnalysisResult } from "@/lib/analysis/types";
 import { getMessages, plural } from "@/lib/i18n";
 import { MAX_PACKAGES, type GitHubRef, type ParseSuccess } from "@/lib/input/types";
 
@@ -14,6 +14,7 @@ interface Props {
 export function ResultNotices({ result, parsed, onUseMonorepoExample }: Props) {
   const t = getMessages();
   const rateLimited = result.packages.filter((p) => p.githubStatus === "rate-limited").length;
+  const unscored = unscoredReasons(result.packages);
   return (
     <>
       <GitHubQuotaNotice quota={result.github} skipped={rateLimited} />
@@ -25,9 +26,14 @@ export function ResultNotices({ result, parsed, onUseMonorepoExample }: Props) {
           {plural(t.preview.truncated, parsed.truncated, { max: MAX_PACKAGES })}
         </p>
       )}
-      {result.forecast.unscored > 0 && (
+      {unscored.notFound > 0 && (
         <p className="border-l-2 border-line-strong pl-3 text-sm text-fog">
-          {plural(t.preview.noData, result.forecast.unscored)}
+          {plural(t.preview.notOnNpm, unscored.notFound)}
+        </p>
+      )}
+      {unscored.failed > 0 && (
+        <p className="border-l-2 border-line-strong pl-3 text-sm text-fog">
+          {plural(t.preview.noData, unscored.failed)}
         </p>
       )}
       {parsed.skipped.length > 0 && (
