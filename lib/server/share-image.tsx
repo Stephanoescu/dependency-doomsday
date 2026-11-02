@@ -318,6 +318,52 @@ function GenericCard({ format, url, label }: { format: ImageFormat; url: string;
   );
 }
 
+/** The home page's own card: the promise in one look. */
+function HomeCard({ url }: { url: string }) {
+  const t = getMessages();
+  return (
+    <Frame format="wide">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Brand />
+        <div style={{ display: "flex", fontSize: 20, color: C.fog }}>{t.og.homeBadge}</div>
+      </div>
+      <div style={{ display: "flex", flex: 1, alignItems: "center", gap: 56 }}>
+        <Clock minutes={3} level="high" size={330} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 26, flex: 1 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", fontFamily: "Display", fontSize: 64, lineHeight: 1.02 }}>
+            <span>{t.og.genericTitle}&nbsp;</span>
+            <span style={{ color: C.alarm }}>{t.og.genericAccent}</span>
+          </div>
+          <div style={{ display: "flex", fontSize: 26, lineHeight: 1.35, color: C.fog }}>{t.og.homeBody}</div>
+          <div style={{ display: "flex", gap: 12 }}>
+            {t.og.homeChips.map((chip, i) => (
+              <div
+                key={chip}
+                style={{
+                  display: "flex",
+                  padding: "6px 14px",
+                  border: `2px solid ${[C.alarm, C.amber, C.mid][i] ?? C.lineStrong}`,
+                  color: [C.alarm, C.amber, C.mid][i] ?? C.fog,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  letterSpacing: 2,
+                }}
+              >
+                {chip.toUpperCase()}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Footer url={url} size={20} />
+    </Frame>
+  );
+}
+
+export async function renderHomeImage(url: string): Promise<ImageResponse> {
+  return new ImageResponse(<HomeCard url={url} />, { ...IMAGE_SIZE.wide, fonts: await loadFonts() });
+}
+
 export async function renderShareImage(
   { summary, format, url, label }: { summary: ForecastSummary | null; format: ImageFormat; url: string; label?: string },
   headers: Record<string, string>,

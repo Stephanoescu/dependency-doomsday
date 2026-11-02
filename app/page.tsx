@@ -1,4 +1,5 @@
 import { ForecastForm } from "@/components/forecast-form";
+import { HomePreview } from "@/components/home-preview";
 import { RichText } from "@/components/rich-text";
 import { getMessages } from "@/lib/i18n";
 
@@ -22,6 +23,9 @@ export default function Home() {
           </section>
         }
       />
+      <div className="mt-16 max-w-3xl sm:mt-24">
+        <HomePreview />
+      </div>
     </main>
   );
 }
