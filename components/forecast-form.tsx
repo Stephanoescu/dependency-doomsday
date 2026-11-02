@@ -45,6 +45,7 @@ function errorText(
   return fmt(t.errors[result.error], {
     location: result.location ?? "package.json",
     seconds: result.retryAfter ?? 60,
+    example: result.example ?? `${result.location ?? "packages"}/your-package`,
   });
 }
 
@@ -197,7 +198,10 @@ export function ForecastForm({ hero }: { hero?: ReactNode }) {
     status.kind !== "done"
       ? null
       : !status.parsed.ok
-        ? errorText(t, status.parsed, status.includeDev)
+        ? // A monorepo root has no dependencies of its own: the monorepo hint already says what to do.
+          status.parsed.monorepo
+          ? null
+          : errorText(t, status.parsed, status.includeDev)
         : analysis && !analysis.ok
           ? fmt(t.errors[analysis.error], {
               seconds: analysis.error === "rate-limited" ? analysis.retryAfter : 0,
