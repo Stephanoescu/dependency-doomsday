@@ -128,7 +128,9 @@ it, packages are scored from npm data only, and the app says so.
 **Ranking cron.** [`vercel.json`](vercel.json) schedules `/api/cron/ranking` twice a day (06:00 and
 06:30 UTC), which is within what Hobby allows. Each run computes the projects in waves of 3 and starts
 new waves only within a 30 s budget. Progress is saved to the cache, and if work remains the route
-calls itself again, so every invocation stays inside the Hobby `maxDuration` of 60 s.
+calls itself again, so every invocation stays inside the Hobby `maxDuration` of 60 s. With a
+`GITHUB_TOKEN` and a cold cache, a full run of all 10 projects took about 9 s and about 125 GitHub
+requests, in a single invocation.
 
 **Analytics.** Enable Web Analytics in the project's **Analytics** tab. It counts anonymous page views
 without cookies. Every result has its own URL, so visits to `/r/github/…` show what each shared post
