@@ -1,5 +1,7 @@
 import type { GitHubQuota, GitHubRepoInfo, GitHubStatus } from "@/lib/analysis/types";
 import { rawFileUrl } from "@/lib/input/github-url";
+import { workspaceCandidates } from "@/lib/input/monorepo";
+import { readWorkspaces } from "@/lib/input/package-json";
 import { MAX_INPUT_BYTES, type GitHubRef, type InputErrorCode } from "@/lib/input/types";
 import { parseLernaJson, parsePnpmWorkspaceYaml } from "@/lib/input/workspaces";
 import { getJson, USER_AGENT } from "./http";
@@ -254,4 +256,41 @@ export async function fetchExternalWorkspaces(ref: GitHubRef): Promise<string[] 
   if (pnpmGlobs.length) return pnpmGlobs;
   const lernaGlobs = lerna === undefined ? undefined : parseLernaJson(lerna);
   return lernaGlobs?.length ? lernaGlobs : undefined;
+}
+
+function isPackageJson(text: string | undefined): boolean {
+  if (text === undefined) return false;
+  try {
+    const json: unknown = JSON.parse(text);
+    return typeof json === "object" && json !== null && !Array.isArray(json);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The first likely workspace folder that has a package.json ("packages/next"
+ * for vercel/next.js). A handful of parallel reads through
+ * raw.githubusercontent.com, so it costs no API quota.
+ */
+export async function findWorkspacePackage(ref: GitHubRef, workspaces: string[]): Promise<string | undefined> {
+  const candidates = workspaceCandidates(workspaces, ref);
+  const files = await Promise.all(candidates.map((path) => fetchRawText({ ...ref, path }, "package.json")));
+  return candidates.find((_, i) => isPackageJson(files[i]));
+}
+
+/** Workspace globs declared at the repo root (package.json, pnpm or Lerna). No API quota. */
+export async function fetchRootWorkspaces(ref: GitHubRef): Promise<string[] | undefined> {
+  const root = { ...ref, path: undefined };
+  const text = await fetchRawText(root, "package.json");
+  if (text !== undefined) {
+    try {
+      const pkg: unknown = JSON.parse(text);
+      const declared = typeof pkg === "object" && pkg !== null ? readWorkspaces(pkg as Record<string, unknown>) : undefined;
+      if (declared?.length) return declared;
+    } catch {
+      // Not JSON: look for pnpm or Lerna instead.
+    }
+  }
+  return fetchExternalWorkspaces(root);
 }

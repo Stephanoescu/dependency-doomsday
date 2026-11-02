@@ -65,6 +65,7 @@ export const en = {
       "No runtime dependencies to analyze. Turn on devDependencies to include build and test tools.",
     "repo-not-found": "We couldn't find that repo. It may be private, renamed or misspelled.",
     "package-json-not-found": "The repo exists, but there's no package.json at {location}.",
+    "workspace-folder": "Add a package name after {location}/ — for example {example}.",
     "github-rate-limited":
       "GitHub is rate-limiting us right now. Try again in a few minutes, or paste the package.json instead.",
     "github-timeout":

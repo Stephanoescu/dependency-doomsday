@@ -36,6 +36,8 @@ export interface SkippedDependency {
 export interface MonorepoInfo {
   /** Workspace globs declared in package.json, e.g. ["packages/*"]. */
   workspaces: string[];
+  /** A workspace folder with a package.json, e.g. "packages/next", when one was found. */
+  example?: string;
 }
 
 export type InputErrorCode =
@@ -51,6 +53,8 @@ export type InputErrorCode =
   // GitHub fetching
   | "repo-not-found"
   | "package-json-not-found"
+  /** The path is the folder that holds the workspaces ("packages/"), not a package. */
+  | "workspace-folder"
   | "github-rate-limited"
   | "github-timeout"
   | "github-unavailable"
@@ -84,7 +88,7 @@ export type ParseResult = ParseSuccess | ParseFailure;
 /** Body of POST /api/resolve, also returned by the browser-side resolver. */
 export type ResolveResponse =
   | (ParseSuccess & { ref?: GitHubRef })
-  | (ParseFailure & { ref?: GitHubRef; location?: string; retryAfter?: number });
+  | (ParseFailure & { ref?: GitHubRef; location?: string; retryAfter?: number; example?: string });
 
 export interface GitHubRef {
   owner: string;

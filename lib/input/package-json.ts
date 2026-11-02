@@ -72,7 +72,7 @@ export function classifySpec(spec: unknown): SpecClass {
   return { kind: "registry" };
 }
 
-function readWorkspaces(pkg: Record<string, unknown>): string[] | undefined {
+export function readWorkspaces(pkg: Record<string, unknown>): string[] | undefined {
   const ws = pkg.workspaces;
   const list = Array.isArray(ws) ? ws : isPlainObject(ws) ? ws.packages : undefined;
   if (!Array.isArray(list)) return undefined;

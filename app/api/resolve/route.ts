@@ -7,7 +7,13 @@ import {
   type ParseResult,
   type ResolveResponse,
 } from "@/lib/input/types";
-import { fetchExternalWorkspaces, fetchPackageJsonFromGitHub } from "@/lib/server/github";
+import { workspaceFolderOf } from "@/lib/input/monorepo";
+import {
+  fetchExternalWorkspaces,
+  fetchPackageJsonFromGitHub,
+  fetchRootWorkspaces,
+  findWorkspacePackage,
+} from "@/lib/server/github";
 import { clientIp, rateLimit, rateLimitHeaders } from "@/lib/server/rate-limit";
 
 const MAX_BODY_BYTES = 8 * 1024;
@@ -23,6 +29,7 @@ const STATUS: Partial<Record<InputErrorCode, number>> = {
   "unsupported-host": 400,
   "repo-not-found": 404,
   "package-json-not-found": 404,
+  "workspace-folder": 404,
   "github-rate-limited": 429,
   "rate-limited": 429,
   "github-timeout": 504,
@@ -74,6 +81,15 @@ export async function POST(request: Request) {
 
   const fetched = await fetchPackageJsonFromGitHub(ref);
   if (!fetched.ok) {
+    // ".../tree/HEAD/packages/" is the folder that holds the packages: ask for one by name.
+    if (fetched.error === "package-json-not-found" && ref.path) {
+      const workspaces = await fetchRootWorkspaces(ref);
+      const folder = workspaces && workspaceFolderOf(ref.path, workspaces);
+      if (workspaces && folder) {
+        const example = await findWorkspacePackage({ ...ref, path: undefined }, workspaces);
+        return reply({ ok: false, error: "workspace-folder", ref, location: folder, ...(example && { example }) });
+      }
+    }
     return reply({
       ok: false,
       error: fetched.error,
@@ -90,6 +106,11 @@ export async function POST(request: Request) {
   if (!ref.path && mightBeMonorepoRoot(result)) {
     const externalWorkspaces = await fetchExternalWorkspaces(ref);
     if (externalWorkspaces) result = parsePackageJson(fetched.text, { ...options, externalWorkspaces });
+  }
+  // Give the monorepo hint a real package to point at, so its example works as is.
+  if (!ref.path && result.monorepo) {
+    const example = await findWorkspacePackage(ref, result.monorepo.workspaces);
+    if (example) result = { ...result, monorepo: { ...result.monorepo, example } };
   }
   return reply({ ...result, ref });
 }

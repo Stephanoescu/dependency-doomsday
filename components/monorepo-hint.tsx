@@ -13,7 +13,7 @@ interface Props {
 
 export function MonorepoHint({ monorepo, githubRef, onUseExample }: Props) {
   const t = getMessages();
-  const url = monorepoExampleUrl(monorepo.workspaces, githubRef);
+  const url = monorepoExampleUrl(monorepo.workspaces, githubRef, monorepo.example);
   const shown = monorepo.workspaces.slice(0, MAX_WORKSPACES_SHOWN);
 
   return (
@@ -41,7 +41,8 @@ export function MonorepoHint({ monorepo, githubRef, onUseExample }: Props) {
         <div>
           <p className="text-sm text-fog">{t.monorepo.example}</p>
           <code className="mt-1.5 block border border-line bg-void px-3 py-2 font-mono text-xs break-all text-bone sm:text-sm">
-            {url}…
+            {url}
+            {!monorepo.example && "…"}
           </code>
         </div>
 
