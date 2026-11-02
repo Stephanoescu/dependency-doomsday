@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@/components/analytics";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { defaultLocale, getMessages } from "@/lib/i18n";
@@ -28,10 +29,10 @@ export const metadata: Metadata = {
     siteName: t.brand.name,
     title: t.meta.title,
     description: t.meta.description,
-    images: [{ url: "/api/og", width: 1200, height: 630, alt: t.meta.title }],
     type: "website",
   },
-  twitter: { card: "summary_large_image", images: ["/api/og"] },
+  // The image itself comes from app/opengraph-image.tsx (and per-page overrides).
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
@@ -49,6 +50,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />
+        {/* The script only exists on Vercel; elsewhere it would just 404. */}
+        {process.env.VERCEL === "1" && <Analytics />}
       </body>
     </html>
   );

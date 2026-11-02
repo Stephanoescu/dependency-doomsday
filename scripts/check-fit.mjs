@@ -32,7 +32,7 @@ for (const vp of VIEWPORTS) {
     reducedMotion: "reduce", // final state at once
   });
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "load" });
   await page.fill("textarea", SAMPLE);
   await page.click("button[type=submit]");
   await page.waitForSelector("#result-headline", { timeout: 60_000 });
