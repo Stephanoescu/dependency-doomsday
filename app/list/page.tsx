@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ErrorIcon } from "@/components/icons";
 import { SharedForecast, SharedForecastFallback } from "@/components/shared-forecast";
@@ -49,6 +50,8 @@ async function Forecast(props: Props) {
       </div>
     );
   }
+  // The cache read checks expiry against the clock: request time only, never a prefetch prerender.
+  await connection();
   return <SharedForecast source={source} path={sharePath(source)} initial={await cachedForecast(source)} />;
 }
 

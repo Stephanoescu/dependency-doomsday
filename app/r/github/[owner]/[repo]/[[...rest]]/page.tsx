@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { SharedForecast, SharedForecastFallback } from "@/components/shared-forecast";
 import { fmt, getMessages } from "@/lib/i18n";
@@ -33,6 +34,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 async function Forecast(props: Props) {
   const source = await sourceOf(props);
   if (!source) notFound();
+  // The cache read checks expiry against the clock: request time only, never a prefetch prerender.
+  await connection();
   return <SharedForecast source={source} path={sharePath(source)} initial={await cachedForecast(source)} />;
 }
 
