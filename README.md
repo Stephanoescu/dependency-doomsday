@@ -1,118 +1,165 @@
+<div align="center">
+
 # Dependency Doomsday
 
-**How close is your project to midnight?** Paste a `package.json` or a public GitHub repo and get a
-doomsday forecast of your npm dependencies: which are abandoned, which have a single npm maintainer,
-and which are critical. You get a score from 0 to 100, a doomsday clock, and a link, image and badge
-you can share.
+**How close is your project to midnight?**
 
-- **Free:** public APIs only (npm registry, npm downloads, GitHub) on Vercel's free plan.
-- **Rules, not AI:** fixed, versioned rules, documented in plain language at `/methodology`
-  (logic in [`lib/risk.ts`](lib/risk.ts)).
-- **Private:** only package names are processed. Pasted files are parsed in the browser and your code
-  is never sent anywhere.
+Paste a `package.json` or a public GitHub repo and get a doomsday forecast of your npm dependencies.
+
+[![Dependency Doomsday](https://dependency-doomsday.vercel.app/api/badge?repo=Stephanoescu/dependency-doomsday)](https://dependency-doomsday.vercel.app/r/github/Stephanoescu/dependency-doomsday)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**[dependency-doomsday.vercel.app](https://dependency-doomsday.vercel.app)** · [Methodology](https://dependency-doomsday.vercel.app/methodology) · [Who holds up the internet?](https://dependency-doomsday.vercel.app/ranking)
+
+<img src="docs/demo.gif" alt="A forecast for expressjs/express: the doomsday clock sweeps to 8 minutes to midnight, the score counts up and a treemap of dependencies appears, colored by risk." width="360">
+
+</div>
+
+In 2016, one developer unpublished **left-pad**, 11 lines of code, and builds broke across the internet.
+In 2024, the exhausted lone maintainer of **xz** handed commit access to a stranger who planted a
+backdoor. Dependency Doomsday checks each of your dependencies for the same kind of risk:
+
+- is it **abandoned**?
+- does it have **a single npm maintainer**?
+- is it **critical**: a single maintainer and more than a million downloads a month?
+
+You get a score from 0 to 100, a doomsday clock, the reasons behind every number, and the people worth
+thanking. The result lives at a shareable link, with a share image and a README badge like the one
+above.
+
+- **Free:** public APIs only, on Vercel's free plan.
+- **Rules, not AI:** a fixed, versioned and explainable methodology.
+- **Private:** only package names are processed. Pasted files are parsed in your browser.
 - **No sign-up**, no database.
+
+## Add the badge to your README
+
+```markdown
+[![Dependency Doomsday](https://dependency-doomsday.vercel.app/api/badge?repo=OWNER/REPO)](https://dependency-doomsday.vercel.app/r/github/OWNER/REPO)
+```
+
+Or run a forecast and press **Copy badge**.
+
+## How it works
+
+1. **Input.** A pasted `package.json` is parsed in the browser. For a GitHub repo, the server reads
+   `package.json` from `raw.githubusercontent.com` and keeps only the package names. Reading the file
+   this way costs no GitHub API quota. Monorepos (workspaces, pnpm, Lerna) are detected and you're
+   asked to point at a package.
+2. **Evidence.** For each dependency (up to 150), the app collects three things:
+   - **npm registry:** maintainers, release dates, deprecation, linked repository, dependency count
+     and funding;
+   - **npm downloads:** monthly downloads, fetched in bulk;
+   - **GitHub:** last push, whether the repo is archived, and open issues.
+
+   It runs at most 8 requests at a time, caches results for 24 hours, and a failing source never stops
+   the analysis.
+3. **Score.** Each package gets a risk from 0 to 100. The project score is 100 minus the
+   download-weighted average risk. Minutes to midnight = score ÷ 10.
+4. **Share.** Each result has its own link, which is recomputed from the cache when opened:
+   - repos: `/r/github/owner/repo`;
+   - pasted files: `/list?d=…`. These links hold package names only, and leave out any package npm
+     couldn't find, since those are probably private.
+
+   The link comes with a 1200×630 or 1080×1920 image and a shields-style badge.
+
+## Methodology (v1)
+
+| Rule                                                   | Risk points |
+| ------------------------------------------------------ | ----------- |
+| Deprecated or unpublished on npm, or repo archived     | = 100       |
+| A single npm maintainer                                | +30         |
+| Last release more than 36 months ago                   | +40         |
+| Otherwise, last release more than 18 months ago        | +25         |
+| No push to the GitHub repo in more than 24 months      | +15         |
+| No linked repository                                   | +10         |
+
+- **Discounts:** the release-age penalty is **halved** (once) for packages that look *possibly
+  finished*, or when the repo had a push in the last 12 months. A package looks possibly finished when
+  it has no dependencies of its own, fewer than 10 open issues, and isn't deprecated or archived.
+- **Cap and colors:** risk is capped at 100. Green is 0–29, yellow 30–59, red 60 and up.
+- **Critical:** a single maintainer and more than 1M downloads a month. Critical packages weigh double
+  in the project score.
+- **Missing data:** packages without npm data are left out of the score. Packages without GitHub data
+  are scored from npm alone and labeled as such.
+
+The plain-language version lives at [`/methodology`](https://dependency-doomsday.vercel.app/methodology).
+The code is in [`lib/risk.ts`](lib/risk.ts), with tests and a sanity check against frozen real-world
+data.
 
 ## Run it locally
 
 Requires Node.js 20.9 or newer. No accounts or environment variables are needed.
 
 ```bash
+git clone https://github.com/Stephanoescu/dependency-doomsday.git
+cd dependency-doomsday
 npm install
 npm run dev          # http://localhost:3000
 ```
 
-| Script                      | What it does                                                            |
-| --------------------------- | ----------------------------------------------------------------------- |
-| `npm run dev`               | Development server                                                      |
-| `npm run build && npm start`| Production build and server                                             |
-| `npm test`                  | Unit tests (Vitest): parsing, risk rules, narrative, links, cache…      |
-| `npm run lint` / `typecheck`| ESLint / TypeScript                                                     |
-| `npm run check:fit`         | Checks the result's first screen fits 390×844 and 360×740 (server must be running; uses your installed Chrome) |
-| `npm run fixtures:capture`  | Refreshes the frozen real-world data used by the sanity test            |
+| Script                        | What it does                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| `npm run dev`                 | Development server                                                               |
+| `npm run build && npm start`  | Production build and server                                                      |
+| `npm test`                    | Unit tests (Vitest)                                                              |
+| `npm run lint` / `typecheck`  | ESLint / TypeScript                                                              |
+| `npm run check:fit`           | Checks the result's first screen fits 390×844 and 360×740. Needs a running server and your installed Chrome. |
+| `npm run fixtures:capture`    | Refreshes the real-world data behind the sanity test                             |
+| `npm run sample:capture`      | Refreshes the sample forecast shown on the home page                             |
 
-## Configuration
+Without a `GITHUB_TOKEN`, GitHub allows 60 requests per hour. That's enough to try a few projects; past
+it, packages are scored from npm data only, and the app says so.
 
-Every variable is optional; copy [`.env.example`](.env.example) to `.env.local` and fill in what you need.
+## Deploy to Vercel
 
-| Variable                                             | Why                                                                                                   |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`                                       | GitHub allows 60 requests/hour per IP without a token and 5,000 with one. Fine-grained token, public repositories read-only. |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared cache and rate limits across serverless instances. **Recommended in production** (see below). |
-| `NEXT_PUBLIC_SITE_URL`                               | Public origin for Open Graph tags, e.g. `https://doomsday.example`. Defaults to the Vercel production URL, then `http://localhost:3000`. |
+1. Fork or clone this repo and push it to your GitHub account.
+2. In Vercel, click **Add New → Project** and import the repo. The defaults work.
+3. Add the environment variables (**Settings → Environment Variables**), then redeploy:
 
-## Deploying to Vercel
+| Variable                                             | Needed?          | Why                                                                                                  |
+| ---------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`                                       | Recommended      | 5,000 GitHub requests per hour instead of 60. Use a fine-grained token with read-only access to public repositories. |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Recommended      | A cache and rate limits shared across serverless instances. Setup below.                             |
+| `CRON_SECRET`                                        | For the ranking  | Any long random string. Vercel Cron sends it to `/api/cron/ranking`.                                  |
+| `NEXT_PUBLIC_SITE_URL`                               | With a custom domain | Public origin for Open Graph tags. Defaults to the Vercel production URL.                        |
 
-1. Import the repository in Vercel. The defaults work and no build settings are needed.
-2. Add `GITHUB_TOKEN` and, if you use a custom domain, `NEXT_PUBLIC_SITE_URL`.
-3. Set up Upstash as described below.
+**Ranking cron.** [`vercel.json`](vercel.json) schedules `/api/cron/ranking` twice a day (06:00 and
+06:30 UTC), which is within what Hobby allows. Each run computes the projects in waves of 3 and starts
+new waves only within a 30 s budget. Progress is saved to the cache, and if work remains the route
+calls itself again, so every invocation stays inside the Hobby `maxDuration` of 60 s.
 
-The API routes that keep working after responding (`/api/analyze`, `/api/og`, `/api/badge`) declare
-`maxDuration = 60`, which the Hobby plan allows with or without Fluid compute.
+**Analytics.** Enable Web Analytics in the project's **Analytics** tab. It counts anonymous page views
+without cookies. Every result has its own URL, so visits to `/r/github/…` show what each shared post
+brings in. `/list` URLs are reported without their package list.
 
-### Setting up Upstash Redis (recommended in production)
+### Setting up Upstash Redis
 
-Without Upstash, the cache lives in each serverless instance's memory, which causes two problems:
+Without Upstash, each serverless instance has its own cache. A link-preview crawler that lands on a cold
+instance may get the generic image, and rate limits are only approximate. Upstash has a free plan.
 
-- A link-preview crawler that lands on a cold instance gets the generic brand image instead of the
-  score.
-- The per-IP rate limit is counted per instance, so it is only approximate.
-
-With Upstash, every instance shares one 24-hour cache and one set of rate-limit counters. Upstash has
-a free plan.
-
-1. **Create a database.** Sign in at [console.upstash.com](https://console.upstash.com), click
-   **Create Database** and choose **Redis**.
-   - **Region:** pick the one closest to your Vercel functions. Vercel's default, `iad1`, is in
-     Washington D.C., so use `us-east-1`.
+1. **Create a database.** Sign in at [console.upstash.com](https://console.upstash.com) and click
+   **Create Database → Redis**.
+   - **Region:** the one closest to your Vercel functions (`us-east-1` for Vercel's default `iad1`).
    - **Plan:** Free.
    - Leave eviction off.
-2. **Copy the credentials.** On the database page, open the **REST API** section and copy
-   `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
-3. **Add them to Vercel.** In Vercel, go to **Project → Settings → Environment Variables**, add both
-   variables for Production (and Preview, if you like), then **redeploy**. Environment variables only
-   apply to new deployments.
-   - You can also connect Upstash through **Vercel → Storage → Marketplace**. If the integration names
-     the variables differently (for example `KV_REST_API_URL` and `KV_REST_API_TOKEN`), add the two
-     variables above with the same values.
-4. **Verify.** Run a forecast on the live site, then open **Data Browser** in Upstash. You should see
-   keys like `dd:v4:npm:express`, `dd:v4:sum:…` and `dd:rl:analyze:…`.
+2. **Copy the credentials.** In the database's **REST API** section, copy `UPSTASH_REDIS_REST_URL` and
+   `UPSTASH_REDIS_REST_TOKEN`.
+3. **Add them to Vercel.** Add both under **Settings → Environment Variables** and redeploy.
+   - If you connect Upstash through **Vercel → Storage** instead, and it names the variables
+     differently (for example `KV_REST_API_URL`), add the two names above with the same values.
+4. **Verify.** Run a forecast, then open **Data Browser** in Upstash. You should see keys like
+   `dd:v4:npm:express` and `dd:rl:analyze:…`.
 
-To use Upstash locally as well, put the same two variables in `.env.local`.
+An uncached forecast costs a few Redis commands per package, and a hobby deployment stays far below
+the free plan. If Redis is unreachable, the app treats it as a cache miss and keeps working.
 
-**Usage:** an uncached forecast costs a few Redis commands per package. Cached forecasts cost a
-handful in total. Rate-limit checks cost 3 commands each. A hobby deployment stays far below the free
-plan's monthly allowance; check [upstash.com/pricing](https://upstash.com/pricing) for current limits.
-If Upstash is unreachable, the app falls back to treating every lookup as a cache miss and allowing
-the request, so a Redis outage never takes the site down.
+## Tech
 
-## How it works
+Next.js (App Router, Cache Components), TypeScript, Tailwind CSS, Vitest, `next/og` for images,
+lz-string for list links, Upstash Redis (optional) and Vercel Web Analytics.
 
-- **Input:** `package.json` text is parsed in the browser. For GitHub repos, `/api/resolve` reads
-  `package.json` from `raw.githubusercontent.com`, which costs no API quota, and returns package names
-  only.
-- **Data:** `/api/analyze` streams progress as NDJSON while it collects data:
-  - npm registry documents, reduced to the few fields the rules use;
-  - monthly downloads, using the bulk endpoint for unscoped packages;
-  - GitHub repo activity.
+## License
 
-  It runs at most 8 requests at a time, caches results for 24 hours, and a failing source never stops
-  the analysis.
-- **Score:** see `/methodology`. Package score = sum of rule points, capped at 100. Project score =
-  100 − the download-weighted average risk. Minutes to midnight = score ÷ 10.
-- **Share links:**
-  - repos: `/r/github/owner/repo[/tree/<ref>/<path>]`;
-  - pasted files: `/list?d=<lz-string>`. This link holds package names only, and leaves out packages
-    npm couldn't find, which are likely private.
-
-  Links are recomputed on open, from the cache.
-- **Images:** `/api/og` renders 1200×630 and 1080×1920 cards. If the analysis takes more than about
-  4 s, crawlers get the brand card and the analysis finishes in the background, so the next request
-  gets the score.
-- **Badge:** `/api/badge?repo=owner/repo` returns a shields-style SVG that links to the report.
-- **Limits:** per IP, `/api/analyze` allows 10 requests/min, `/api/resolve` 30/min, and images and
-  badges 30/min.
-
-## License and credits
-
-The fonts in [`assets/fonts`](assets/fonts) (Archivo Black, JetBrains Mono) are licensed under the SIL
-Open Font License; their license files sit next to them.
+[MIT](LICENSE) © 2026 Stephano. The fonts in [`assets/fonts`](assets/fonts) (Archivo Black,
+JetBrains Mono) are under the SIL Open Font License.
