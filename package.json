@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "fixtures:capture": "vitest run --mode capture scripts/capture-risk-fixtures.test.ts",
     "check:fit": "node scripts/check-fit.mjs",
-    "sample:capture": "vitest run --mode capture scripts/capture-home-sample.test.ts"
+    "sample:capture": "vitest run --mode capture scripts/capture-home-sample.test.ts",
+    "check:token": "node scripts/check-github-token.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.40.0",

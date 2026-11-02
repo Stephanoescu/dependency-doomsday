@@ -104,11 +104,12 @@ npm run dev          # http://localhost:3000
 | `npm run build && npm start`  | Production build and server                                                      |
 | `npm test`                    | Unit tests (Vitest)                                                              |
 | `npm run lint` / `typecheck`  | ESLint / TypeScript                                                              |
+| `npm run check:token`         | Confirms `GITHUB_TOKEN` is loaded and GitHub grants 5,000 requests/hour (never prints the token) |
 | `npm run check:fit`           | Checks the result's first screen fits 390×844 and 360×740. Needs a running server and your installed Chrome. |
 | `npm run fixtures:capture`    | Refreshes the real-world data behind the sanity test                             |
 | `npm run sample:capture`      | Refreshes the sample forecast shown on the home page                             |
 
-Without a `GITHUB_TOKEN`, GitHub allows 60 requests per hour. That's enough to try a few projects; past
+To use a token locally, create `.env.local` with `GITHUB_TOKEN=github_pat_…`, restart `npm run dev`, and check it with `npm run check:token`. Without a `GITHUB_TOKEN`, GitHub allows 60 requests per hour. That's enough to try a few projects; past
 it, packages are scored from npm data only, and the app says so.
 
 ## Deploy to Vercel
