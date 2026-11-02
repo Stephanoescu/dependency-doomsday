@@ -6,10 +6,10 @@
 
 Paste a `package.json` or a public GitHub repo and get a doomsday forecast of your npm dependencies.
 
-[![Dependency Doomsday](https://dependency-doomsday.vercel.app/api/badge?repo=Stephanoescu/dependency-doomsday)](https://dependency-doomsday.vercel.app/r/github/Stephanoescu/dependency-doomsday)
+[![Dependency Doomsday](https://dep-doomsday.vercel.app/api/badge?repo=Stephanoescu/dependency-doomsday)](https://dep-doomsday.vercel.app/r/github/Stephanoescu/dependency-doomsday)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**[dependency-doomsday.vercel.app](https://dependency-doomsday.vercel.app)** · [Methodology](https://dependency-doomsday.vercel.app/methodology) · [Who holds up the internet?](https://dependency-doomsday.vercel.app/ranking)
+**[dep-doomsday.vercel.app](https://dep-doomsday.vercel.app)** · [Methodology](https://dep-doomsday.vercel.app/methodology) · [Who holds up the internet?](https://dep-doomsday.vercel.app/ranking)
 
 <img src="docs/demo.gif" alt="A forecast for expressjs/express: the doomsday clock sweeps to 8 minutes to midnight, the score counts up and a treemap of dependencies appears, colored by risk." width="360">
 
@@ -35,7 +35,7 @@ above.
 ## Add the badge to your README
 
 ```markdown
-[![Dependency Doomsday](https://dependency-doomsday.vercel.app/api/badge?repo=OWNER/REPO)](https://dependency-doomsday.vercel.app/r/github/OWNER/REPO)
+[![Dependency Doomsday](https://dep-doomsday.vercel.app/api/badge?repo=OWNER/REPO)](https://dep-doomsday.vercel.app/r/github/OWNER/REPO)
 ```
 
 Or run a forecast and press **Copy badge**.
@@ -83,7 +83,7 @@ Or run a forecast and press **Copy badge**.
 - **Missing data:** packages without npm data are left out of the score. Packages without GitHub data
   are scored from npm alone and labeled as such.
 
-The plain-language version lives at [`/methodology`](https://dependency-doomsday.vercel.app/methodology).
+The plain-language version lives at [`/methodology`](https://dep-doomsday.vercel.app/methodology).
 The code is in [`lib/risk.ts`](lib/risk.ts), with tests and a sanity check against frozen real-world
 data.
 
